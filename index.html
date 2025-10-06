@@ -1,61 +1,144 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Statistics Homeworks | Sarah Oualli</title>
 <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
 <style>
+  :root {
+    --bg: #0a0010;
+    --accent: #b6ffb6;
+    --accent-dim: rgba(255,182,255,.35);
+    --glow: #ffb6ff;
+    --text: #eaffef;
+  }
+  .matrix-mode {
+    --bg: #000;
+    --accent: #00ff99;
+    --accent-dim: rgba(255,0,204,.4);
+    --glow: #ff00cc;
+    --text: #dfffe9;
+  }
   *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
   body{
-    background:#000;
+    background:var(--bg);
+    color:var(--text);
     font-family:'Cascadia Code', monospace;
-    color:#dfffe9;
-    overflow-x:hidden;
+    overflow:hidden;
   }
-  #matrix{
-    position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;background:#000;
+  body::after{
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;z-index:9999;
+    background:repeating-linear-gradient(rgba(255,255,255,0.045) 0 1px, transparent 1px 2px);
+    mix-blend-mode:overlay;
+    animation:flicker 2s infinite;
   }
-  .glass{
-    max-width:900px;margin:4rem auto;padding:2rem;
-    background:rgba(10,20,10,0.75);
-    border:1px solid rgba(0,255,136,0.25);
-    border-radius:12px;
-    box-shadow:0 0 25px rgba(0,255,136,0.15),inset 0 0 8px rgba(255,255,255,0.05);
+  @keyframes flicker{0%,100%{opacity:.06}50%{opacity:.11}}
+  #matrix{position:fixed;inset:0;width:100vw;height:100vh;z-index:-2;background:var(--bg);}
+  #boot{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;z-index:50;color:#00ff99;
   }
-  h1{
-    text-align:center;font-size:2.8rem;color:#00ff99;text-shadow:0 0 10px #00ff99;margin-bottom:.5rem;
-
-}
-  h2,p{text-align:center;color:#aaffcc;margin-bottom:1rem;font-size:1rem}
-  .posts{margin-top:1.5rem}
-  .post{background:rgba(0,0,0,0.65);border:1px solid rgba(0,255,136,0.2);border-radius:8px;padding:1rem;margin-top:.8rem}
-  .post a{text-decoration:none;color:#00ff99;display:flex;justify-content:space-between;align-items:center}
-  .post a:hover{text-decoration:underline;text-shadow:0 0 5px #00ff99}
+  .boot-box{
+    max-width:720px;width:90%;
+    border:1px solid rgba(0,255,153,.35);
+    padding:1.25rem 1.5rem;border-radius:10px;
+    background:rgba(0,0,0,.8);
+    box-shadow:0 0 24px rgba(0,255,153,.3),inset 0 0 12px rgba(255,255,255,.05);
+  }
+  .boot-line{line-height:1.45;white-space:pre-wrap;text-shadow:0 0 10px #00ff99}
+  .cursor{display:inline-block;width:.6ch;text-align:center;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .fade-out{animation:fade .4s ease forwards}
+  @keyframes fade{to{opacity:0;visibility:hidden}}
+  #toggle{
+    position:fixed;top:14px;right:14px;z-index:10;
+    background:transparent;border:1px solid var(--accent-dim);
+    color:var(--accent);padding:.45rem .7rem;border-radius:8px;
+    cursor:pointer;text-shadow:0 0 8px var(--glow);
+    transition:.25s;
+  }
+  #toggle:hover{background:var(--accent);color:#000}
+  .header{
+    position:relative;max-width:980px;margin:4.5rem auto 1.2rem;width:calc(100% - 2rem);
+    border:1px solid var(--accent-dim);border-radius:12px;padding:1.2rem 1.4rem;
+    background:rgba(0,0,0,.8);
+    box-shadow:0 0 22px var(--accent-dim),inset 0 0 10px rgba(255,255,255,.05)
+  }
+  .header-line{color:var(--accent);text-shadow:0 0 10px var(--glow);font-size:1.15rem;white-space:pre-wrap}
+  .sub{color:var(--accent);opacity:.85;margin-top:.5rem;font-size:.95rem;text-align:left}
+  .content{max-width:980px;margin:.6rem auto;width:calc(100% - 2rem)}
+  .hw-box{
+    border:1px solid var(--accent-dim);border-radius:10px;background:rgba(0,0,0,.85);
+    padding:1.2rem 1.4rem;box-shadow:0 0 18px var(--accent-dim),inset 0 0 8px rgba(255,255,255,.04)
+  }
+  .sep{color:var(--accent);opacity:.7;text-align:center}
+  .hw-title{display:block;text-align:center;font-size:1.4rem;font-weight:700;color:var(--accent);text-shadow:0 0 12px var(--glow);margin:.4rem 0}
+  .hw-date{display:block;text-align:center;font-size:1rem;color:var(--accent);opacity:.95;margin-bottom:.6rem}
+  .hw-sub{text-align:center;color:var(--text);opacity:.92;font-size:1rem}
+  .hw-click{margin-top:1rem;display:flex;justify-content:center}
+  .hw-btn{
+    background:transparent;border:1px solid var(--accent-dim);
+    color:var(--accent);cursor:pointer;padding:.5rem .9rem;border-radius:8px;
+    font-family:'Cascadia Code', monospace;transition:.25s;text-shadow:0 0 8px var(--glow)
+  }
+  .hw-btn:hover{background:var(--accent);color:#000}
+  #term-log{position:fixed;inset:auto 0 24px 0;margin:auto;width:min(720px,92%);z-index:9;
+    background:rgba(0,0,0,.8);border:1px solid var(--accent-dim);border-radius:10px;padding:.9rem 1rem;display:none}
+  #term-log p{color:var(--accent);text-shadow:0 0 8px var(--glow);line-height:1.35}
+  #idle{position:fixed;left:14px;bottom:14px;z-index:8;color:var(--accent);opacity:0;transition:.35s;}
 </style>
 </head>
 <body>
 <canvas id="matrix"></canvas>
-<div class="glass">
-  <h1 id="title">Statistics Homeworks</h1>
-  <h2>Sarah Oualli – Mat.2254756</h2>
-  <p>A.A. 25/26</p>
-  <div class="panel">
-    <div class="posts" id="posts">
-      <div class='post'>
-        <a href="homework1.html" target="_blank">
-          <span>Homework 1 — What is statistics, and why can it be useful for cybersecurity?</span>
-          <span style="color:#aaffcc;font-size:0.9rem">09/10/2025</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="boot"><div class="boot-box" id="bootBox"><div class="boot-line" id="bootLine"></div></div></div>
+<button id="toggle" aria-label="Toggle theme">Matrix Mode</button>
+<section class="header">
+  <div class="header-line"><span>&gt; </span><span id="titleType"></span><span class="cursor" id="titleCursor">█</span></div>
+  <div class="sub">Sarah Oualli – Mat.2254756</div>
+  <div class="sub">A.A. 25/26</div>
+</section>
+<main class="content">
+  <section class="hw-box">
+    <div class="sep">----------------------------------------</div>
+    <strong class="hw-title">Homework_1</strong>
+    <div class="hw-date">[09.10.25]</div>
+    <div class="hw-sub">What is statistics, and why can it be useful for cybersecurity?</div>
+    <div class="sep" style="margin-top:.6rem">----------------------------------------</div>
+    <div class="hw-click"><button class="hw-btn" id="openHW1" data-url="homework1.html">&gt; open Homework_1</button></div>
+  </section>
+</main>
+<div id="term-log"></div><div id="idle"></div>
 <script>
-const canvas=document.getElementById('matrix');const ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-const letters='01@#$%&*+=-{}[]<>/';const fontSize=16;const cols=canvas.width/fontSize;const drops=Array(Math.floor(cols)).fill(1);
-function draw(){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00FF00';ctx.font=fontSize+'px Cascadia Code';for(let i=0;i<drops.length;i++){const text=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}}setInterval(draw,35);
+/* ===== MATRIX BACKGROUND (LATIN + JAPANESE + ARABIC + SYMBOLS) ===== */
+const canvas=document.getElementById('matrix');
+const ctx=canvas.getContext('2d');
+let W=canvas.width=window.innerWidth;
+let H=canvas.height=window.innerHeight;
+let fontSize=16;
+let letters='01@#$%&*+=-{}[]<>/アイウエオカキクケコサシスセソタチツテトナニヌネノマミムメモヤユヨラリルレロワンابتثجحخدذرزسشصضطظعغفقكلمنهوي';
+let cols,drops;
+function setupMatrix(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;cols=Math.floor(W/fontSize);drops=Array(cols).fill(1+Math.floor(Math.random()*H/fontSize));}
+setupMatrix();window.addEventListener('resize',setupMatrix);
+function draw(){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,W,H);const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent');ctx.fillStyle=accent.trim();ctx.font=fontSize+'px Cascadia Code';for(let i=0;i<drops.length;i++){const char=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(char,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
+setInterval(draw,35);
+const bootLine=document.getElementById('bootLine');const boot=document.getElementById('boot');const bootScript=['[ SYSTEM BOOTING... ]','Initializing neural matrix...','Authenticating user...','Access granted.','Welcome, user.'];
+function typeSequence(lines,el,cb){let li=0;let ci=0;el.innerHTML='';const cursor='<span class="cursor">█</span>';function step(){if(li>=lines.length){cb&&cb();return;}const current=lines[li];if(ci<=current.length){el.innerHTML=lines.slice(0,li).map(l=>l).join('\n')+(li?'\n':'')+current.slice(0,ci)+cursor;ci++;setTimeout(step,20);}else{li++;ci=0;setTimeout(step,100);}}step();}
+setTimeout(()=>{typeSequence(bootScript,bootLine,()=>{boot.classList.add('fade-out');setTimeout(()=>boot.remove(),400);startTitleTyping();});},200);
+const titleType=document.getElementById('titleType');const titleText='STATISTICS HOMEWORKS';
+function startTitleTyping(){titleType.textContent='';let i=0;function step(){if(i<=titleText.length){titleType.textContent=titleText.slice(0,i);i++;setTimeout(step,65+Math.random()*45);}}step();}
+const toggleBtn=document.getElementById('toggle');let matrixMode=false;
+function setMode(isMatrix){matrixMode=isMatrix;document.body.classList.toggle('matrix-mode',matrixMode);toggleBtn.textContent=matrixMode?'Cyberpunk Mode':'Matrix Mode';const newColor=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();ctx.fillStyle=newColor;}
+toggleBtn.addEventListener('click',()=>setMode(!matrixMode));
+const termLog=document.getElementById('term-log');
+function showLog(lines,then){termLog.innerHTML='';termLog.style.display='block';let i=0;const iv=setInterval(()=>{if(i<lines.length){const p=document.createElement('p');p.textContent=lines[i];termLog.appendChild(p);i++;}else{clearInterval(iv);setTimeout(()=>{termLog.style.display='none';then&&then();},350);}},260);}
+document.getElementById('openHW1').addEventListener('click',e=>{const url=e.currentTarget.dataset.url;showLog(['> Accessing Homework_1...','> File verified.','> Opening document...'],()=>{window.open(url,'_blank');});});
+const idle=document.getElementById('idle');const idleMsgs=['[INFO] Background process running...','[OK] Matrix stream stable.','[WARN] System temperature: normal.','[LOG] Cache warmed successfully.','[SYNC] Homework index updated.'];let idleTimer=null,hideTimer=null;
+function scheduleIdle(){clearTimeout(idleTimer);clearTimeout(hideTimer);idleTimer=setTimeout(()=>{idle.textContent=idleMsgs[Math.floor(Math.random()*idleMsgs.length)];idle.style.opacity=1;hideTimer=setTimeout(()=>idle.style.opacity=0,4000);},10000);}['mousemove','keydown','click','scroll','touchstart'].forEach(evt=>window.addEventListener(evt,scheduleIdle));scheduleIdle();
 </script>
 </body>
 </html>

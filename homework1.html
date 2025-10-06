@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework 1 | Statistics & Cybersecurity</title>
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --accent: #00ff99;
+      --accent-dim: rgba(255,0,204,0.4);
+      --glow: #ff00cc;
+      --text: #dfffe9;
+    }
+    .cyber-mode {
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(255,182,255,0.35);
+      --glow: #ffb6ff;
+      --text: #eaffef;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cascadia Code', monospace;
+      overflow-x: hidden;
+      padding: 2rem;
+    }
+    #toggle {
+      position: fixed; top: 16px; right: 16px; z-index: 10;
+      background: transparent;
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      padding: .5rem .9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-shadow: 0 0 8px var(--glow);
+      transition: 0.25s;
+    }
+    #toggle:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    .container {
+      max-width: 800px;
+      margin: 6rem auto;
+      padding: 2rem;
+      background: rgba(0,0,0,0.85);
+      border: 1px solid var(--accent-dim);
+      box-shadow: 0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);
+      border-radius: 12px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--glow);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 1.1rem;
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    h3 {
+      font-size: 1rem;
+      text-align: center;
+      color: var(--accent);
+      opacity: 0.8;
+      margin-bottom: 2rem;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .answer {
+      margin-top: 2rem;
+      padding: 1.2rem;
+      background: rgba(255,255,255,0.03);
+      border-left: 4px solid var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <button id="toggle">Matrix Mode</button>
+
+  <div class="container">
+    <h1>Homework_1</h1>
+    <h2>What is statistics, and why can it be useful for cybersecurity?</h2>
+    <h3>Due to 09/10/25</h3>
+
+    <div class="answer">
+      <p>
+        Statistics is the discipline that allows us to analyze, interpret, and visualize data to uncover patterns and insights. It transforms raw information into meaningful conclusions that can support decision-making.
+      </p>
+      <p>
+        In cybersecurity, statistics is essential for detecting anomalies and threats. By establishing what “normal” network traffic looks like, statistical models can quickly flag unusual behavior, such as spikes in data transfer or unauthorized access attempts.
+      </p>
+      <p>
+        Techniques from <strong>machine learning</strong> and <strong>deep learning</strong>—rooted in statistical principles—are now widely used in intrusion detection systems. For instance, models like Random Forests or Neural Networks can classify malicious versus benign traffic with high accuracy by learning from large datasets.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggle');
+    let matrixMode = false;
+    function setMode(isMatrix) {
+      matrixMode = isMatrix;
+      document.body.classList.toggle('cyber-mode', !matrixMode);
+      toggleBtn.textContent = matrixMode ? 'Cyberpunk Mode' : 'Matrix Mode';
+    }
+    toggleBtn.addEventListener('click', () => setMode(!matrixMode));
+  </script>
+</body>
+</html>
