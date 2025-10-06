@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics Homeworks | Sarah Oualli</title>
+<link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#000;
+    font-family:'Cascadia Code', monospace;
+    color:#dfffe9;
+    overflow-x:hidden;
+  }
+  #matrix{
+    position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;background:#000;
+  }
+  .glass{
+    max-width:900px;margin:4rem auto;padding:2rem;
+    background:rgba(10,20,10,0.75);
+    border:1px solid rgba(0,255,136,0.25);
+    border-radius:12px;
+    box-shadow:0 0 25px rgba(0,255,136,0.15),inset 0 0 8px rgba(255,255,255,0.05);
+  }
+  h1{
+    text-align:center;font-size:2.8rem;color:#00ff99;text-shadow:0 0 10px #00ff99;margin-bottom:.5rem;
+
+}
+  h2,p{text-align:center;color:#aaffcc;margin-bottom:1rem;font-size:1rem}
+  .posts{margin-top:1.5rem}
+  .post{background:rgba(0,0,0,0.65);border:1px solid rgba(0,255,136,0.2);border-radius:8px;padding:1rem;margin-top:.8rem}
+  .post a{text-decoration:none;color:#00ff99;display:flex;justify-content:space-between;align-items:center}
+  .post a:hover{text-decoration:underline;text-shadow:0 0 5px #00ff99}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div class="glass">
+  <h1 id="title">Statistics Homeworks</h1>
+  <h2>Sarah Oualli – Mat.2254756</h2>
+  <p>A.A. 25/26</p>
+  <div class="panel">
+    <div class="posts" id="posts">
+      <div class='post'>
+        <a href="homework1.html" target="_blank">
+          <span>Homework 1 — What is statistics, and why can it be useful for cybersecurity?</span>
+          <span style="color:#aaffcc;font-size:0.9rem">09/10/2025</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('matrix');const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+const letters='01@#$%&*+=-{}[]<>/';const fontSize=16;const cols=canvas.width/fontSize;const drops=Array(Math.floor(cols)).fill(1);
+function draw(){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00FF00';ctx.font=fontSize+'px Cascadia Code';for(let i=0;i<drops.length;i++){const text=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}}setInterval(draw,35);
+</script>
+</body>
+</html>
