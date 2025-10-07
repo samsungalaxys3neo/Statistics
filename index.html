@@ -6,6 +6,7 @@
 <title>Statistics Homeworks | Sarah Oualli</title>
 <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
 <style>
+  /* === Tutto il tuo CSS invariato === */
   :root {
     --bg: #0a0010;
     --accent: #b6ffb6;
@@ -109,12 +110,14 @@
     <div class="hw-date">[09.10.25]</div>
     <div class="hw-sub">What is statistics, and why can it be useful for cybersecurity?</div>
     <div class="sep" style="margin-top:.6rem">----------------------------------------</div>
-    <div class="hw-click"><button class="hw-btn" id="openHW1" data-url="homework1.html">&gt; open Homework_1</button></div>
+    <div class="hw-click">
+      <button class="hw-btn" id="openHW1" data-url="./homework1.html">&gt; open Homework_1</button>
+    </div>
   </section>
 </main>
 <div id="term-log"></div><div id="idle"></div>
 <script>
-/* ===== MATRIX BACKGROUND (LATIN + JAPANESE + ARABIC + SYMBOLS) ===== */
+/* ===== MATRIX BACKGROUND ===== */
 const canvas=document.getElementById('matrix');
 const ctx=canvas.getContext('2d');
 let W=canvas.width=window.innerWidth;
@@ -126,17 +129,32 @@ function setupMatrix(){W=canvas.width=window.innerWidth;H=canvas.height=window.i
 setupMatrix();window.addEventListener('resize',setupMatrix);
 function draw(){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,W,H);const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent');ctx.fillStyle=accent.trim();ctx.font=fontSize+'px Cascadia Code';for(let i=0;i<drops.length;i++){const char=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(char,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
 setInterval(draw,35);
+
+/* ===== BOOT SEQUENCE ===== */
 const bootLine=document.getElementById('bootLine');const boot=document.getElementById('boot');const bootScript=['[ SYSTEM BOOTING... ]','Initializing neural matrix...','Authenticating user...','Access granted.','Welcome, user.'];
 function typeSequence(lines,el,cb){let li=0;let ci=0;el.innerHTML='';const cursor='<span class="cursor">█</span>';function step(){if(li>=lines.length){cb&&cb();return;}const current=lines[li];if(ci<=current.length){el.innerHTML=lines.slice(0,li).map(l=>l).join('\n')+(li?'\n':'')+current.slice(0,ci)+cursor;ci++;setTimeout(step,20);}else{li++;ci=0;setTimeout(step,100);}}step();}
 setTimeout(()=>{typeSequence(bootScript,bootLine,()=>{boot.classList.add('fade-out');setTimeout(()=>boot.remove(),400);startTitleTyping();});},200);
+
+/* ===== TITLE ===== */
 const titleType=document.getElementById('titleType');const titleText='STATISTICS HOMEWORKS';
 function startTitleTyping(){titleType.textContent='';let i=0;function step(){if(i<=titleText.length){titleType.textContent=titleText.slice(0,i);i++;setTimeout(step,65+Math.random()*45);}}step();}
+
+/* ===== TOGGLE MODE ===== */
 const toggleBtn=document.getElementById('toggle');let matrixMode=false;
-function setMode(isMatrix){matrixMode=isMatrix;document.body.classList.toggle('matrix-mode',matrixMode);toggleBtn.textContent=matrixMode?'Cyberpunk Mode':'Matrix Mode';const newColor=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();ctx.fillStyle=newColor;}
+function setMode(isMatrix){matrixMode=isMatrix;document.body.classList.toggle('matrix-mode',matrixMode);toggleBtn.textContent=matrixMode?'Cyberpunk Mode':'Matrix Mode';}
 toggleBtn.addEventListener('click',()=>setMode(!matrixMode));
+
+/* ===== OPEN HOMEWORK FIX ===== */
 const termLog=document.getElementById('term-log');
 function showLog(lines,then){termLog.innerHTML='';termLog.style.display='block';let i=0;const iv=setInterval(()=>{if(i<lines.length){const p=document.createElement('p');p.textContent=lines[i];termLog.appendChild(p);i++;}else{clearInterval(iv);setTimeout(()=>{termLog.style.display='none';then&&then();},350);}},260);}
-document.getElementById('openHW1').addEventListener('click',e=>{const url=e.currentTarget.dataset.url;showLog(['> Accessing Homework_1...','> File verified.','> Opening document...'],()=>{window.open(url,'_blank');});});
+document.getElementById('openHW1').addEventListener('click',e=>{
+  const url=e.currentTarget.dataset.url;
+  const base = window.location.pathname.replace(/\/[^\/]*$/, '/'); // mantiene la directory /Statistics/
+  const fullPath = new URL(url, window.location.origin + base).href;
+  showLog(['> Accessing Homework_1...','> File verified.','> Opening document...'],()=>{ window.open(fullPath,'_blank'); });
+});
+
+/* ===== IDLE INFO ===== */
 const idle=document.getElementById('idle');const idleMsgs=['[INFO] Background process running...','[OK] Matrix stream stable.','[WARN] System temperature: normal.','[LOG] Cache warmed successfully.','[SYNC] Homework index updated.'];let idleTimer=null,hideTimer=null;
 function scheduleIdle(){clearTimeout(idleTimer);clearTimeout(hideTimer);idleTimer=setTimeout(()=>{idle.textContent=idleMsgs[Math.floor(Math.random()*idleMsgs.length)];idle.style.opacity=1;hideTimer=setTimeout(()=>idle.style.opacity=0,4000);},10000);}['mousemove','keydown','click','scroll','touchstart'].forEach(evt=>window.addEventListener(evt,scheduleIdle));scheduleIdle();
 </script>
