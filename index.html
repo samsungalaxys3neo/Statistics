@@ -15,7 +15,7 @@
   }
   .matrix-mode {
     --bg: #000;
-    --accent: #00ff99;
+    --accent: #eb08b6;
     --accent-dim: rgba(255,0,204,.4);
     --glow: #ff00cc;
     --text: #dfffe9;
@@ -117,18 +117,44 @@
 <div id="term-log"></div><div id="idle"></div>
 
 <script>
-/* ===== MATRIX BACKGROUND ===== */
-const canvas=document.getElementById('matrix');
-const ctx=canvas.getContext('2d');
-let W=canvas.width=window.innerWidth;
-let H=canvas.height=window.innerHeight;
-let fontSize=16;
-let letters='01@#$%&*+=-{}[]<>/アイウエオカキクケコサシスセソタチツテトナニヌネノマミムメモヤユヨラリルレロワンابتثجحخدذرزسشصضطظعغفقكلمنهوي';
-let cols,drops;
-function setupMatrix(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;cols=Math.floor(W/fontSize);drops=Array(cols).fill(1+Math.floor(Math.random()*H/fontSize));}
-setupMatrix();window.addEventListener('resize',setupMatrix);
-function draw(){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,W,H);const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent');ctx.fillStyle=accent.trim();ctx.font=fontSize+'px Cascadia Code';for(let i=0;i<drops.length;i++){const char=letters[Math.floor(Math.random()*letters.length)];ctx.fillText(char,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
-setInterval(draw,35);
+/* ===== MATRIX BACKGROUND (DYNAMIC COLOR) ===== */
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+let fontSize = 16;
+
+// include latin + japanese + arabic + symbols
+let letters = '01@#$%&*+=-{}[]<>/アイウエオカキクケコサシスセソタチツテトナニヌネノマミムメモヤユヨラリルレロワンابتثجحخدذرزسشصضطظعغفقكلمنهوي';
+let cols, drops;
+
+function setupMatrix() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  cols = Math.floor(W / fontSize);
+  drops = Array(cols).fill(1 + Math.floor(Math.random() * H / fontSize));
+}
+setupMatrix();
+window.addEventListener('resize', setupMatrix);
+
+function draw() {
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, W, H);
+
+  // ✅ cambia il colore in base alla modalità attiva
+  const isMatrixMode = document.body.classList.contains('matrix-mode');
+  ctx.fillStyle = isMatrixMode ? '#00ff99' : '#ff00cc'; // verde neon vs rosa
+  ctx.font = fontSize + 'px Cascadia Code';
+
+  for (let i = 0; i < drops.length; i++) {
+    const char = letters[Math.floor(Math.random() * letters.length)];
+    ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > H && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(draw, 35);
+
 
 /* ===== BOOT SEQUENCE ===== */
 const bootLine=document.getElementById('bootLine');const boot=document.getElementById('boot');const bootScript=['[ SYSTEM BOOTING... ]','Initializing neural matrix...','Authenticating user...','Access granted.','Welcome, user.'];
