@@ -7,13 +7,15 @@
 <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
 <style>
   :root {
+    /* Default: Matrix (verde) */
     --bg: #0a0010;
     --accent: #b6ffb6;
     --accent-dim: rgba(182,255,182,.25);
     --glow: #b6ffb6;
     --text: #f4fff7;
   }
-  body.matrix-mode {
+  body.cyberpunk-mode {
+    /* Cyberpunk (fucsia) */
     --bg: #000;
     --accent: #ff00cc;
     --accent-dim: rgba(255,0,204,.25);
@@ -101,16 +103,13 @@
   <h3>Due: 09 / 10 / 2025</h3>
 
   <div class="terminal-line">
-    <p><strong>Statistics</strong> transforms raw data into structured knowledge.  
-    It allows analysts to uncover trends, test hypotheses, and build predictive models from apparently random information.</p>
+    <p><strong>Statistics</strong> transforms raw data into structured knowledge. It allows analysts to uncover trends, test hypotheses, and build predictive models from apparently random information.</p>
   </div>
   <div class="terminal-line">
-    <p>In <strong>cybersecurity</strong>, statistics helps define what “normal” looks like —  
-    making it possible to detect outliers: unusual traffic, login spikes, or suspicious patterns.</p>
+    <p>In <strong>cybersecurity</strong>, statistics helps define what “normal” looks like — making it possible to detect outliers: unusual traffic, login spikes, or suspicious patterns.</p>
   </div>
   <div class="terminal-line">
-    <p>By calculating averages, variances, and deviations, a system can raise alerts whenever new data  
-    significantly deviates from expected behavior. That’s how intrusion detection works in practice.</p>
+    <p>By calculating averages, variances, and deviations, a system can raise alerts whenever new data significantly deviates from expected behavior. That’s how intrusion detection works in practice.</p>
   </div>
   <div class="terminal-line">
     <p>Let’s simulate this below: a statistical model scanning network packets and identifying anomalies in real time.</p>
@@ -127,13 +126,18 @@
 
 <script>
 const toggleBtn=document.getElementById('toggle');
-let matrixMode=false;
-function setMode(isMatrix){
-  matrixMode=isMatrix;
-  document.body.classList.toggle('matrix-mode',matrixMode);
-  toggleBtn.textContent=matrixMode?'Matrix Mode':'Cyberpunk Mode';
+let cyberpunkMode=false;
+
+function setMode(isCyberpunk){
+  cyberpunkMode=isCyberpunk;
+  document.body.classList.toggle('cyberpunk-mode',cyberpunkMode);
+  toggleBtn.textContent=cyberpunkMode?'Matrix Mode':'Cyberpunk Mode';
 }
-toggleBtn.addEventListener('click',()=>setMode(!matrixMode));
+
+// ✅ Start in Matrix (verde)
+setMode(false);
+
+toggleBtn.addEventListener('click',()=>setMode(!cyberpunkMode));
 
 document.getElementById('backHome').addEventListener('click',()=>{
   const base=window.location.pathname.replace(/\/[^\/]*$/,'/');
