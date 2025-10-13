@@ -50,7 +50,6 @@
       border:1px solid var(--accent-dim);
       border-radius:12px;
       box-shadow:0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);
-
     }
     h1,h2,h3,h4{color:var(--accent);text-shadow:0 0 8px var(--glow);text-align:center;}
     h1{font-size:2.3rem;margin-bottom:.4rem;}
@@ -108,23 +107,9 @@
       overflow-wrap: break-word;
     }
 
-    .cursor {
-      display:inline-block;
-      width:10px;
-      background:var(--accent);
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0%,50% {opacity:1}
-      50.1%,100% {opacity:0}
-    }
-
-    #backHome {
-  font-family: 'Cascadia Code', monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-    }
-
+    canvas{display:block;margin:2rem auto;background:rgba(0,0,0,0.8);border-radius:10px;box-shadow:0 0 20px var(--accent-dim);width:100%;max-width:850px;height:350px;}
+    textarea{width:100%;margin:1rem 0;padding:1rem;border-radius:8px;border:1px solid var(--accent-dim);font-family:'Cascadia Code',monospace;background:#171717;color:var(--accent);height:200px;resize:none;overflow-y:auto;}
+    select{display:block;margin:1rem auto;padding:.6rem;border-radius:8px;border:1px solid var(--accent-dim);background:#171717;color:var(--accent);}
   </style>
 </head>
 <body>
@@ -164,10 +149,297 @@
   <button class="btn" id="analyzeBi">&gt; Compute Correlation()</button>
   <pre id="outputBi"></pre>
 
-  <button class="btn" id="backHome">&gt; return to Home</button>
+  <hr style="margin:2.5rem 0;border:none;border-top:2px solid var(--accent-dim);">
+
+  <h2>Caesar Cipher: Letter Frequency Visualization</h2>
+  <p>Let's analyze how often each letter appears in a given text. This kind of analysis can reveal structure even in encrypted data.</p>
+  <textarea id="inputText">IL FIGLIO DEL BRAHMINO
+Nell'ombra della casa, sulle rive soleggiate del fiume presso le
+barche, nell'ombra del bosco di Sal, all'ombra del fico crebbe
+Siddharta, il bel figlio del Brahmino, il giovane falco, insieme
+all'amico suo, Govinda, anch'egli figlio di Brahmino. Sulla riva
+del fiume, nei bagni, nelle sacre abluzioni, nei sacrifici votivi il
+sole bruniva le sue spalle lucenti. Ombre attraversavano i suoi
+occhi neri nel boschetto di mango, durante i giochi infantili, al
+canto di sua madre, durante i santi sacrifici, alle lezioni di suo
+padre, così dotto, durante le conversazioni dei saggi. Già da tempo
+Siddharta prendeva parte alle conversazioni dei saggi, si
+esercitava con Govinda nell'arte oratoria, nonché nell'esercizio
+delle facoltà di osservazione e nella pratica della concentrazione
+interiore. Già egli sapeva come si pronuncia impercettibilmente
+1'Om, la parola suprema, sapeva assorbirla in se stesso
+pronunciandola silenziosamente nell'atto di inspirare, sapeva
+emetterla silenziosamente nell'atto di espirare, con l'anima
+raccolta, la fronte raggiante dello splendore che emana da uno
+spirito luminoso. Già egli sapeva, nelle profondità del proprio
+essere, riconoscere l'Atman, indistruttibile, uno con la totalità del
+mondo.
+Il cuore del padre balzava di gioia per quel figlio così studioso,
+così avido di sapere; era un grande sapiente, un sommo sacerdote
+quello ch'egli vedeva svilupparsi in lui: un principe fra i Brahmini.
+La gioia gonfiava il petto di sua madre quand'ella lo guardava,
+quando lo vedeva camminare, quando lo vedeva sedere e alzarsi:
+Siddharta, così forte, così bello, che procedeva col suo passo
+snello, che la salutava con garbo così compìto.
+17
+Siddharta – Parte Prima
+L'amore si agitava nel cuore delle giovani figlie dei Brahmini,
+quando Siddharta passava per le strade della città, con la sua
+fronte luminosa, con i suoi occhi regali, così slanciato e nobile
+nella persona.
+Ma più di tutti lo amava l'amico suo Govinda, il figlio del
+Brahmino. Amava gli occhi di Siddharta e la sua cara voce, amava
+il suo passo e il garbo perfetto dei movimenti, amava tutto ciò che
+Siddharta diceva e faceva, ma soprattutto ne amava lo spirito, i
+suoi alti, generosi pensieri, la sua volontà ardente, la vocazione
+sublime. Sapeva bene Govinda: questo non diventerà un
+Brahmino come ce n'è tanti, un pigro ministro di sacrifici, o un
+avido mercante d'incantesimi, un vano e vacuo retore, un prete
+astuto e cattivo, e non sarà nemmeno una buona, sciocca pecora
+nel gregge dei molti. No, e anch'egli, Govinda, non voleva
+diventare tale, un Brahmino come ce ne son migliaia. Voleva
+seguire Siddharta, il prediletto, il magnifico. E se un giorno
+Siddharta fosse diventato un dio, se fosse asceso un giorno nella
+gloria dei celesti, allora Govinda l'avrebbe seguito, come suo
+amico, suo compagno, suo servo, suo scudiere, sua ombra.
+Così tutti amavano Siddharta. A tutti egli dava gioia, tutti ne
+traevano piacere. Ma egli, Siddharta, a sé stesso non procurava
+piacere, non era di gioia a sé stesso. Passeggiando sui sentieri
+rosati del frutteto, sedendo nell'ombra azzurrina del boschetto
+delle contemplazioni, purificando le proprie membra nel
+quotidiano lavacro di espiazione, celebrando i sacrifici nel bosco
+di mango dalle ombre profonde, con la sua perfetta compitezza
+d'atteggiamenti, amato da tutti, di gioia a tutti, pure non portava
+gioia in cuore. Lo assalivano sogni e pensieri irrequieti, portati
+fino a lui dalla corrente del fiume, scintillati dalle stelle della
+notte, dardeggiati dai raggi del sole; sogni lo assalivano, e
+un'agitazione dell'anima, vaporata dai sacrifici, esalante dai versi
+del Rig Veda, stillata dalle dottrine dei vecchi testi brahminici.
+Siddharta aveva cominciato ad alimentare in sé la scontentezza.
+Aveva cominciato a sentire che l'amore di suo padre e di sua
+18
+Il Figlio del Brahmino
+madre, e anche l'amore dell'amico suo, Govinda, non avrebbero
+fatto per sempre la sua eterna felicità, non gli avrebbero dato la
+quiete, non l'avrebbero saziato, non gli sarebbero bastati. Aveva
+cominciato a sospettare che il suo degnissimo padre e gli altri suoi
+maestri, cioè i saggi Brahmini, gli avevano già impartito il più e il
+meglio della loro saggezza, avevano già versato interamente i loro
+vasi pieni nel suo recipiente in attesa, ma questo recipiente non
+s'era riempito, lo spirito non era soddisfatto, l'anima non era
+tranquilla, non placato il cuore.
+Buona cosa le abluzioni, certo: ma erano acqua, non lavavano
+via il peccato, non guarivano la sete dello spirito, non
+scioglievano gli affanni del cuore. Eccellente cosa i sacrifici e la
+preghiera agli dèi: ma questo era tutto? Davano i sacrifici la
+felicità? E come stava questa faccenda degli dèi? Era realmente
+Prajapati che aveva creato il mondo? Non era invece 1'Atman,
+l'unico, il solo, il Tutto? Che gli dèi non fossero poi forme create,
+come tu e io, soggette al tempo, caduche? Anzi, era poi bene, era
+giusto, era un atto sensato e sublime sacrificare agli dèi? A chi
+altri si doveva sacrificare, a chi altri si doveva rendere onore, se
+non a Lui, all'Unico, all'Atman?
+E dove si poteva trovare 1'Atman, dove abitava, dove batteva il
+suo eterno cuore, dove altro mai se non nel più profondo del
+proprio io, in quel che di indistruttibile ognuno porta in sé? Ma
+dove, dov'era questo Io, questa interiorità, questo assoluto? Non
+era carne e ossa, non era pensiero né coscienza: così insegnavano i
+più saggi. Dove, dove dunque era? Penetrare laggiù, fino all'Io, a
+me, all'Atman: c'era forse un'altra via che mettesse conto di
+esplorare? Ahimè! questa via nessuno la insegnava, nessuno la
+conosceva, non il padre, non i maestri e i saggi, non i pii canti dei
+sacrifici! Tutto sapevano i Brahmini e i loro libri sacri, tutto, e
+perfino qualche cosa di più; di tutto s'erano occupati, della
+creazione del mondo, della natura del linguaggio, dei cibi,
+dell'inspirare e dell'espirare, della gerarchia dei cinque sensi, dei
+fatti degli dèi... cose infinite sapevano... Ma valeva la pena saper
+19
+Siddharta – Parte Prima
+tutto questo, se non si sapeva l'Uno e il Tutto, la cosa più
+importante di tutte, la sola cosa importante?
+Certo, molti versi dei libri santi, specialmente nelle Upanishad
+di Samaveda, parlavano di questa interiorità e di quest'assoluto;
+splendidi versi: «L'anima tua è l'intero mondo», così vi stava
+scritto. E vi stava scritto che l'uomo nel sonno, nel profondo
+sonno, penetra nel proprio Io e prende stanza nell'Atman.
+Meravigliosa saggezza stava in questi versi, tutta la scienza dei
+più saggi stava qui radunata in magiche parole, pura come miele.
+No, non si doveva certo far poco conto della prodigiosa
+conoscenza che qui era stata raccolta e conservata da
+innumerevoli generazioni di Brahmini.
+Ma dov'erano i saggi, dove i sacerdoti o i penitenti, ai quali
+fosse riuscito, non soltanto di conoscerla, questa profondissima
+scienza, ma di viverla? Dove era l'esperto che sapesse
+magicamente richiamare dal sonno allo stato di veglia l'esperienza
+dell'Atman, ricondurla nella vita quotidiana, nella parola e
+nell'azione? Molti degni Brahmini conosceva Siddharta, suo padre
+prima di tutti, il puro, il dotto, degno sopra ogni altro. Ammirabile
+era suo padre, nobile e calmo il suo contegno, pura la sua vita,
+saggia la sua parola, squisiti e alti pensieri avevan dimora dietro la
+sua fronte... ma anche lui, che tanto sapeva, viveva forse nella
+beatitudine, possedeva la pace, non era anche lui soltanto un uomo
+che cerca, un assetato? Non doveva egli sempre riattingere, come
+un assetato, alle sacre fonti, sacrifici, libri, conversazioni dei
+Brahmini? Perché doveva anche lui, l'irreprensibile, purificarsi
+ogni giorno dal peccato, affannarsi per le abluzioni, sempre da
+capo, ogni giorno?
+Dunque non era in lui 1'Atman, non zampillava nel suo cuore
+la fonte originaria? Eppure era questa che bisognava trovare:
+scoprire la fonte originaria nel proprio Io, e impadronirsene! Tutto
+il resto era ricerca, era errore e deviazione.
+Tali erano i pensieri di Siddharta, questa era la sua sete, questo
+il suo tormento.
+20
+Il Figlio del Brahmino
+Spesso egli recitava a sé stesso le parole di una ChandogyaUpanishad: «In verità, Satyam è il nome di Brahma: in verità, chi
+sa questo, ascende ogni giorno nel mondo celeste». Spesso gli
+pareva vicino, il mondo celeste, ma mai l'aveva raggiunto
+interamente, mai aveva spento l'ultima sete. E di tutti i saggi e
+dottissimi ch'egli conosceva, valendosi del loro insegnamento,
+non uno ve n'era che l'avesse raggiunto interamente, il mondo
+celeste, non uno che interamente l'avesse spenta, l'eterna sete.
+«Govinda», disse Siddharta all'amico «Govinda, caro, vieni
+con me sotto il banano: vogliamo esercitarci nella
+concentrazione».
+Andarono verso il banano, sedettero a terra, qui Siddharta,
+venti passi più in là Govinda. Mentre sedeva, pronto a pronunciare
+l'Om, Siddharta ripeteva mormorando i versi: “Om è l'arco, la
+saetta è l'anima, bersaglio della saetta è Brahma, da colpire con
+immobile certezza”.
+Quando il tempo consueto della concentrazione fu trascorso,
+Govinda si alzò. Era calata la sera, era tempo di cominciare
+l'abluzione vespertina. Govinda chiamò Siddharta per nome, ma
+non ottenne risposta. Siddharta sedeva assorto, i suoi occhi erano
+fissati rigidamente sopra una meta lontana, la punta della lingua
+spuntava un poco fra i denti: pareva ch'egli non respirasse. Così
+sedeva, immerso nella concentrazione, pensando 1'Om, l'anima
+indirizzata a Brahma come una saetta.
+E un giorno passarono i Samana attraverso la città di Siddharta:
+asceti girovaghi, tre uomini secchi e spenti, né vecchi né giovani,
+con spalle impolverate e sanguinose, arsi dal sole, circondati di
+solitudine, estranei e ostili al mondo, forestieri nel regno degli
+uomini come macilenti sciacalli. Spirava da loro un'aura di cheta
+passione, di devozione fino all'annientamento, di spietata rinuncia
+alla personalità.
+A sera, dopo l'ora dell'osservazione, Siddharta comunicò a
+Govinda: «Domani mattina per tempo, amico mio, Siddharta
+andrà dai Samana. Diventerà un Samana anche lui».
+21
+Siddharta – Parte Prima
+A queste parole Govinda impallidì, e nel volto immobile
+dell'amico lesse la decisione, inarrestabile come la saetta, scagliata
+dall'arco. Subito, al primo sguardo, Govinda si rese conto: ora
+comincia, ora trova Siddharta la sua via, ora comincia il suo
+destino a germogliare, e con il suo il mio. E divenne pallido, come
+una buccia di banana secca. «O Siddharta», esclamò «te lo
+permetterà tuo padre?».
+Siddharta sollevò lo sguardo, come uno che si ridesta.
+Fulmineamente lesse nell'anima di Govinda: vi lesse la paura, vi
+lesse la dedizione. «O Govinda», rispose sommessamente «è
+inutile sprecar parole. Domani all'alba comincerò la vita del
+Samana. Non parliamone più».
+Siddharta entrò nella camera dove suo padre sedeva sopra una
+stuoia di corteccia, s'avanzò alle sue spalle e rimase là, fermo,
+finché suo padre s'accorse che c'era qualcuno dietro di lui. Disse il
+Brahmino: «Sei tu, Siddharta? Allora dì quel che sei venuto per
+dire».
+Parlò Siddharta: «Col tuo permesso, padre mio. Sono venuto
+ad annunciarti che desidero abbandonare la casa domani mattina
+e recarmi fra gli asceti. Diventare un Samana, questo è il mio
+desiderio. Voglia il cielo che mio padre non si opponga».
+Tacque il Brahmino: tacque così a lungo che nella piccola
+finestra le stelle si spostarono e il loro aspetto mutò, prima che
+venisse rotto il silenzio nella camera. Muto e immobile stava ritto
+il figlio con le braccia conserte, muto e immobile sedeva il padre
+sulla stuoia, e le stelle passavano in cielo. Finalmente parlò il
+padre: «Non s'addice a un Brahmino pronunciare parole violente
+e colleriche. Ma l'irritazione agita il mio cuore. Ch'io non senta
+questa preghiera una seconda volta dalla tua bocca».
+Il Brahmino si alzò lentamente; Siddharta restava in piedi,
+muto, con le braccia conserte. «Che aspetti?» chiese il padre.
+Disse Siddharta: «Tu lo sai».
+Irritato uscì il padre dalla stanza, irritato cercò il suo giaciglio e
+si coricò.
+22
+Il Figlio del Brahmino
+Dopo un'ora, poiché il sonno tardava, il Brahmino si alzò,
+passeggiò in su e in giù, uscì di casa. Guardò attraverso la piccola
+finestra della stanza, e vide Siddharta in piedi, con le braccia
+conserte: non s'era mosso. Come un pallido bagliore emanava dal
+suo mantello bianco. Col cuore pieno d'inquietudine, il padre
+ritornò al suo giaciglio.
+E venne di nuovo dopo un'ora, venne dopo due ore, guardò
+attraverso la piccola finestra, vide Siddharta in piedi, nel chiaro di
+luna, al bagliore delle stelle, nelle tenebre. E ritornò ogni ora, in
+silenzio, guardò nella camera, vide quel ragazzo in piedi,
+immobile, ed il suo cuore si riempì di collera, il suo cuore si
+riempì di disagio, il suo cuore si riempì d'incertezza, il suo cuore
+si riempì di compassione.
+Ritornò nell'ultima ora della notte, prima che il giorno
+spuntasse, entrò nella stanza, vide il giovane in piedi, e gli parve
+grande, quasi straniero. «Siddharta», chiese «che attendi?».
+«Tu lo sai».
+«Starai sempre così ad aspettare che venga giorno,
+mezzogiorno e sera?».
+«Starò ad aspettare».
+«Ti stancherai, Siddharta».
+«Mi stancherò».
+«Ti addormenterai, Siddharta».
+«Non mi addormenterò».
+«Morirai, Siddharta».
+«Morirò».
+«E preferisci morire, piuttosto che obbedire a tuo padre?».
+«Siddharta ha sempre obbedito a suo padre».
+«Allora rinunci al tuo proposito?».
+«Siddharta farà ciò che suo padre gli dirà di fare».
+Le prime luci del giorno entravano nella stanza. Il Brahmino
+vide che Siddharta tremava leggermente sulle ginocchia. Nel volto
+di Siddharta, invece, non si vedeva alcun tremito: gli occhi
+guardavano lontano. Allora il padre s'accorse che Siddharta non
+23
+Siddharta – Parte Prima
+abitava già più con lui in quella casa: Siddharta l'aveva già
+abbandonato.
+Il padre posò la mano sulla spalla di Siddharta. «Andrai nella
+foresta», disse «e diverrai un Samana. Se nella foresta troverai la
+beatitudine, ritorna, e insegnami la beatitudine. Se troverai la
+delusione, ritorna: riprenderemo insieme a sacrificare agli dèi.
+Ora va' a baciar tua madre, dille dove vai. Ma per me è tempo
+d'andare al fiume e di compiere la prima abluzione».
+Tolse la mano dalla spalla di suo figlio, e uscì. Siddharta
+barcollò, quando provò a muoversi. Ma fece forza alle sue
+membra, s'inchinò davanti al padre e andò dalla mamma, per fare
+come suo padre aveva prescritto.
+Quando alle prime luci del giorno, lentamente, con le gambe
+indolenzite, lasciò la città ancora silenziosa, un'ombra, ch'era
+accucciata presso l'ultima capanna, si levò e s'unì al pellegrino:
+Govinda. «Sei venuto» disse Siddharta, e sorrise.
+«Sono venuto» disse Govinda.
+</textarea>
+  <button class="btn" id="analyzeText">&gt; Analyze Letter Distribution()</button>
+  <canvas id="letterChart" width="850" height="350"></canvas>
+
+  <h3>&gt; Step 5 – Encrypt the Text (Caesar Cipher)</h3>
+  <p>The Caesar cipher shifts each letter by a fixed number. Try different keys to see how the distribution changes!</p>
+  <label for="shiftSelect" style="display:block;text-align:center;margin-top:1rem;font-weight:bold;">Select shift key:</label>
+  <div style="display:flex;justify-content:center;align-items:center;gap:.6rem;">
+    <select id="shiftSelect"></select>
+  </div>
+  <button class="btn" id="encryptBtn">&gt; Encrypt Text</button>
+  <textarea id="encryptedText" readonly></textarea>
+  <div class="terminal-line" id="encInfo"><p>&gt; Encrypted text will appear here. Select a shift and press Encrypt.</p></div>
+  <canvas id="encryptedChart" width="850" height="350"></canvas>
+
+  <h3>&gt; Step 6 – Auto Decryption by Frequency Analysis 🔍</h3>
+  <div class="terminal-line"><p><strong>What this does</strong> — The automatic decryptor compares candidate decryptions' letter-frequency distributions with the expected Italian distribution to estimate the most likely shift.</p></div>
+  <div class="terminal-line"><p><strong>Algorithm summary</strong> — For shift=1..25: decrypt, count letters A–Z, normalize to percentages, compute sum-of-squared-differences vs Italian profile; choose the shift with smallest score.</p></div>
+  <button class="btn" id="decryptBtn">&gt; Auto-Decrypt Text</button>
+  <textarea id="decryptedText" readonly style="height:160px;margin-top:1rem;"></textarea>
+  <canvas id="decryptedChart" width="850" height="350" style="margin-top:1rem;"></canvas>
 </div>
 
 <script>
+// Toggle mode
 const toggleBtn=document.getElementById('toggle');
 let cyberpunkMode=false;
 function setMode(isCyberpunk){
@@ -178,7 +450,7 @@ function setMode(isCyberpunk){
 setMode(false);
 toggleBtn.addEventListener('click',()=>setMode(!cyberpunkMode));
 
-// Random dataset generator
+// Dataset generator and display
 function generatePackets(){
   const baseIPs=['192.168.1.2','192.168.1.5','192.168.1.8','192.168.1.10'];
   const packets=[];
@@ -191,9 +463,7 @@ function generatePackets(){
   }
   return packets;
 }
-
 let packets=generatePackets();
-
 const table=document.getElementById('dataTable');
 function renderTable(){
   table.innerHTML='<tr><th>ID</th><th>Source IP</th><th>Destination IP</th><th>Packet Size</th><th>Response Time (ms)</th></tr>'+
@@ -201,7 +471,7 @@ function renderTable(){
 }
 renderTable();
 
-// Typing effect
+// Text typing
 function typeWriter(element, text, speed=15){
   element.textContent='';
   let i=0;
@@ -247,7 +517,159 @@ document.getElementById('analyzeBi').addEventListener('click',()=>{
   const res=`> Correlation between packet size and response time: ${corr}`;
   typeWriter(outputBi,res,12);
 });
+
+// Letter Frequency Chart
+function countLetters(text){
+  const freq={};
+  for(let i=65;i<=90;i++)freq[String.fromCharCode(i)]=0;
+  for(let c of text.toUpperCase())if(c>='A'&&c<='Z')freq[c]++;
+  return freq;
+}
+function drawLetterChart(freq,canvasId){
+  const canvas=document.getElementById(canvasId);
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const letters=Object.keys(freq);
+  const values=letters.map(l=>freq[l]);
+  const max=Math.max(...values,1);
+  const barWidth=(canvas.width-100)/letters.length;
+  ctx.fillStyle='#00ffcc';
+  ctx.font='14px Cascadia Code';
+  ctx.textAlign='center';
+  ctx.strokeStyle='rgba(182,255,182,0.4)';
+  ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(50,300);ctx.lineTo(800,300);ctx.stroke();
+  letters.forEach((l,i)=>{
+    const x=60+i*barWidth;const h=(values[i]/max)*220;
+    ctx.fillRect(x,300-h,barWidth-5,h);
+    ctx.fillStyle='#b6ffb6';ctx.fillText(l,x+(barWidth-5)/2,320);
+    ctx.fillStyle='#00ffcc';
+  });
+}
+function drawLetterChartWithCount(freq,canvasId){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const letters=Object.keys(freq);
+  const values=letters.map(l=>freq[l]);
+  const max=Math.max(...values,1);
+  const barWidth=(canvas.width-100)/letters.length;
+  ctx.fillStyle='#00ffcc';
+  ctx.font='14px Cascadia Code';
+  ctx.textAlign='center';
+  ctx.strokeStyle='rgba(182,255,182,0.4)';
+  ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(50,300);ctx.lineTo(800,300);ctx.stroke();
+  letters.forEach((l,i)=>{
+    const x=60+i*barWidth;const h=(values[i]/max)*220;
+    ctx.fillRect(x,300-h,barWidth-5,h);
+    // Count sopra la barra
+    ctx.fillStyle='#ffeb3b';ctx.font='bold 16px Cascadia Code';
+    ctx.fillText(values[i],x+(barWidth-5)/2,300-h-10);
+    // Lettera sotto la barra
+    ctx.fillStyle='#b6ffb6';ctx.font='14px Cascadia Code';
+    ctx.fillText(l,x+(barWidth-5)/2,320);
+    ctx.fillStyle='#00ffcc';
+  });
+}
+document.getElementById('analyzeText').addEventListener('click',()=>{
+  const text=document.getElementById('inputText').value;
+  const freq=countLetters(text);
+  drawLetterChartWithCount(freq,'letterChart');
+});
+
+// Caesar Cipher Encrypt
+const inputText = document.getElementById('inputText');
+const shiftSelect = document.getElementById('shiftSelect');
+// Populate shift dropdown immediately so options exist when user clicks Encrypt
+if (shiftSelect && shiftSelect.options.length === 0) {
+  for (let i = 1; i <= 25; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `Shift ${i}`;
+    shiftSelect.appendChild(opt);
+  }
+}
+const encryptBtn = document.getElementById('encryptBtn');
+const encryptedText = document.getElementById('encryptedText');
+function caesarCipher(text, shift) {
+  return text.replace(/[A-Za-z]/g, function(c) {
+    const base = c >= 'a' && c <= 'z' ? 97 : 65;
+    return String.fromCharCode(((c.charCodeAt(0) - base + shift) % 26) + base);
+  });
+}
+encryptBtn.addEventListener('click', () => {
+  const shift = parseInt(shiftSelect.value);
+  const ciphered = caesarCipher(inputText.value, shift);
+  encryptedText.value = ciphered;
+  const freq = countLetters(ciphered);
+  drawLetterChartWithCount(freq, 'encryptedChart');
+});
+
+// Auto Decryption (Step 6) – fixed version
+const italianFreq = {
+  'A': 11.0, 'B': 1.05, 'C': 4.30, 'D': 3.39, 'E': 12.0,
+  'F': 1.01, 'G': 1.65, 'H': 1.43, 'I': 10.3, 'L': 5.70,
+  'M': 2.87, 'N': 7.02, 'O': 10.1, 'P': 2.96, 'Q': 0.45,
+  'R': 6.19, 'S': 5.48, 'T': 6.97, 'U': 3.3, 'V': 1.75, 'Z': 0.85
+};
+function normalizeFreq(freq) {
+  const total = Object.values(freq).reduce((a,b)=>a+b,0) || 1;
+  const norm = {};
+  for (let l in freq) norm[l] = (freq[l]/total)*100;
+  return norm;
+}
+function compareDistributions(freq1,freq2){
+  let sum = 0
+  for (let letter in freq2){
+    const f1 = freq1[letter] || 0;
+    const f2 = freq2[letter] || 0;
+    sum += (f1 - f2)**2;
+  }
+  return Math.sqrt(sum);
+}
+document.getElementById('decryptBtn').addEventListener('click', () => {
+  const cipherText = document.getElementById('encryptedText').value;
+  if (!cipherText.trim()) {
+    alert('Please encrypt or paste a ciphered text first!');
+    return;
+  }
+  const normItalianFreq = normalizeFreq(italianFreq);
+  let bestShift = 0;
+  let minDiff = Infinity;
+  for (let shift = 1; shift <= 25; shift++) {
+    const decrypted = caesarCipher(cipherText, 26 - shift);
+    const freq = normalizeFreq(countLetters(decrypted));
+    const diff = compareDistributions(freq, normItalianFreq);
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestShift = shift;
+    }
+  }
+  const finalText = caesarCipher(cipherText, 26 - bestShift);
+  document.getElementById('decryptedText').value =
+    `> Best shift found: ${bestShift}\n> Difference score: ${minDiff.toFixed(3)}\n\n${finalText}`;
+  // update chart with decrypted distribution (draw to decryptedChart so encryptedChart remains unchanged)
+  const freq = countLetters(finalText);
+  drawLetterChartWithCount(freq, 'decryptedChart');
+  // place a terminal-style explanation under the encrypted text describing what happened
+  const encInfo = document.getElementById('encInfo');
+  if (encInfo) {
+    encInfo.textContent = `> Auto-detected shift: ${bestShift} — difference score ${minDiff.toFixed(3)}\n> The decrypted text below was produced by applying shift ${bestShift}.`;
+  }
+});
+
+// add 'return Home' button at the end
+const returnBtn = document.createElement('button');
+returnBtn.className = 'btn';
+returnBtn.id = 'backHome';
+returnBtn.textContent = '> return Home';
+returnBtn.style.marginTop = '1.6rem';
+document.querySelector('.container').appendChild(returnBtn);
+document.getElementById('backHome').addEventListener('click', () => {
+  window.location.href = './index.html';
+});
 </script>
 </body>
 </html>
-
