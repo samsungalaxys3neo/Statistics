@@ -110,6 +110,77 @@
     canvas{display:block;margin:2rem auto;background:rgba(0,0,0,0.8);border-radius:10px;box-shadow:0 0 20px var(--accent-dim);width:100%;max-width:850px;height:350px;}
     textarea{width:100%;margin:1rem 0;padding:1rem;border-radius:8px;border:1px solid var(--accent-dim);font-family:'Cascadia Code',monospace;background:#171717;color:var(--accent);height:200px;resize:none;overflow-y:auto;}
     select{display:block;margin:1rem auto;padding:.6rem;border-radius:8px;border:1px solid var(--accent-dim);background:#171717;color:var(--accent);}
+
+    /* ===== MOBILE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .container {
+    padding: 1.2rem 1rem;
+    margin: 3.5rem auto;
+    box-shadow: 0 0 15px var(--accent-dim), inset 0 0 8px rgba(255,255,255,0.05);
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  h3, h4 {
+    font-size: 0.95rem;
+  }
+
+  .sql-box {
+    font-size: 0.8rem;
+    padding: 0.8rem;
+    line-height: 1.4;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 0.35rem;
+  }
+
+  textarea {
+    height: 140px;
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: none;
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  select {
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  canvas {
+    width: 100%;
+    height: 250px;
+  }
+
+  #toggle {
+    top: 10px;
+    right: 10px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -640,7 +711,6 @@ document.getElementById('decryptBtn').addEventListener('click', () => {
   let minDiff = Infinity;
   for (let shift = 1; shift <= 25; shift++) {
     const decrypted = caesarCipher(cipherText, 26 - shift);
-    const freq = normalizeFreq(countLetters(decrypted));
     const diff = compareDistributions(freq, normItalianFreq);
     if (diff < minDiff) {
       minDiff = diff;
