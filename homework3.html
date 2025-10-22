@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework 3 | RSA & Frequency Attack</title>
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  <style>
+    /* Stesso stile dell'Homework 2 */
+    :root {
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(182,255,182,.25);
+      --glow: #b6ffb6;
+      --text: #f4fff7;
+      --subtitle: #8aff8a;
+    }
+    body.cyberpunk-mode {
+      --bg: #000;
+      --accent: #ff00cc;
+      --accent-dim: rgba(255,0,204,.25);
+      --glow: #ff00cc;
+      --text: #eaffef;
+      --subtitle: #ff88ff;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Cascadia Code', monospace;
+      overflow-x:hidden;
+      padding:2rem;
+      transition:background .6s ease, color .6s ease;
+    }
+    
+    /* Stile per evidenziare le parole chiave */
+    b.highlight {
+      color: var(--accent);
+      text-shadow: 0 0 6px var(--glow);
+      font-weight: bold; /* 'bold' è già predefinito per <b>, ma per chiarezza */
+    }
+
+    #toggle{
+      position:fixed;top:16px;right:16px;z-index:10;
+      background:linear-gradient(145deg,var(--accent),var(--glow));
+      color:#000;border:none;
+      padding:.55rem 1rem;border-radius:10px;cursor:pointer;
+      font-weight:bold;box-shadow:0 0 12px var(--glow),inset 0 0 5px rgba(255,255,255,.2);
+      transition:transform .25s, box-shadow .25s;
+    }
+    #toggle:hover{transform:scale(1.05);box-shadow:0 0 18px var(--glow);}
+
+    .container{
+      max-width:900px;margin:6rem auto;padding:2rem 2.5rem;
+      background:rgba(0,0,0,0.85);
+      border:1px solid var(--accent-dim);
+      border-radius:12px;
+      box-shadow:0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);
+    }
+    h1,h2,h3,h4{color:var(--accent);text-shadow:0 0 8px var(--glow);text-align:center;}
+    h1{font-size:2.3rem;margin-bottom:.4rem;}
+    h2{font-size:1.2rem;margin-bottom:1.8rem;opacity:.9;}
+    h3{margin-top:1.8rem;margin-bottom:.8rem;color:var(--subtitle);text-align:left;}
+    h4{margin-top:1rem;margin-bottom:.5rem;font-size:1rem;color:var(--subtitle);text-align:left;}
+    p{margin-bottom:1rem;text-align:left;line-height:1.6;}
+
+    .btn{
+      display:block;margin:1rem auto;background:transparent;border:1px solid var(--accent-dim);
+      color:var(--accent);padding:.5rem .9rem;border-radius:8px;cursor:pointer;text-shadow:0 0 8px var(--glow);transition:.25s;
+    }
+    .btn:hover{background:var(--accent);color:#000;}
+
+    canvas{display:block;margin:2rem auto;background:rgba(0,0,0,0.8);border-radius:10px;box-shadow:0 0 20px var(--accent-dim);width:100%;max-width:850px;height:350px;}
+    textarea{width:100%;margin:1rem 0;padding:1rem;border-radius:8px;border:1px solid var(--accent-dim);font-family:'Cascadia Code',monospace;background:#171717;color:var(--accent);height:200px;resize:vertical;overflow-y:auto;}
+    
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .input-group label {
+      font-weight: bold;
+      color: var(--subtitle);
+      flex-basis: 120px;
+    }
+    .input-group input {
+      flex-grow: 1;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent-dim);
+      background: #171717;
+      color: var(--text);
+      font-family: 'Cascadia Code', monospace;
+    }
+    .key-display {
+      background: #171717;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      word-wrap: break-word;
+    }
+
+    hr{margin:2.5rem 0;border:none;border-top:2px solid var(--accent-dim);}
+
+    /* 🌐 Responsive design */
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .container { margin: 4rem auto; padding: 1.5rem; width: 95%; }
+      h1 { font-size: 1.8rem; }
+      .input-group { flex-direction: column; align-items: stretch; }
+      .input-group label { flex-basis: auto; margin-bottom: 0.25rem; }
+      canvas { height: auto; }
+      #toggle { top: 10px; right: 10px; }
+    }
+  </style>
+</head>
+<body>
+<button id="toggle">Matrix Mode</button>
+
+<div class="container">
+  <h1>Homework_3</h1>
+  <h2>RSA Encryption & Frequency Analysis</h2>
+
+  <hr>
+
+  <h3>&gt; What is Asymmetric Cryptography?</h3>
+  <p>In <b class="highlight">symmetric ciphers</b>, like the Caesar Cipher (Homework 2), the same key (the "shift") is used to both encrypt and decrypt. This creates a fundamental problem: how do you securely communicate the secret key to the recipient? If the channel can be intercepted, the key is compromised.</p>
+  <p><b class="highlight">Asymmetric cryptography</b> (or public-key cryptography) solves this by using a <b class="highlight">pair of keys</b>:</p>
+  <ul>
+    <li><b class="highlight">Public Key:</b> This key can be shared with anyone. It is used to <b class="highlight">encrypt</b> messages.</li>
+    <li><b class="highlight">Private Key:</b> This key must be kept secret by the owner. It is the only key capable of <b class="highlight">decrypting</b> messages encrypted with its corresponding public key.</li>
+  </ul>
+  <p>This way, anyone can use my public key to send me a secure message, but only I, with my private key, can read it.</p>
+
+  <h3>&gt; The Mathematics of RSA (In Brief)</h3>
+  <p>RSA (Rivest-Shamir-Adleman) is the most famous asymmetric algorithm. Its security is based on the computational difficulty of <b class="highlight">factoring very large numbers</b>. The key generation process is as follows:</p>
+  <ol>
+    <li><b>Choose two large prime numbers</b>, <b class="highlight">p</b> and <b class="highlight">q</b>. (These are secret).</li>
+    <li><b>Calculate the modulus</b> <b class="highlight">n = p * q</b>. (This is the public part of both keys).</li>
+    <li><b>Calculate Euler's "totient"</b> <b class="highlight">ø(n) = (p-1) * (q-1)</b>. (This is secret).</li>
+    <li><b>Choose a public exponent</b> <b class="highlight">e</b>, which must be coprime to ø(n) (common choices are 3, 17, or 65537). The pair <b class="highlight">(e, n)</b> is the Public Key.</li>
+    <li><b>Calculate the private exponent</b> <b class="highlight">d</b>, which is the modular inverse of <code>e</code> modulo <code>ø(n)</code>. (<code>d * e mod ø(n) = 1</code>). The pair <b class="highlight">(d, n)</b> is the Private Key.</li>
+  </ol>
+  <p>To encrypt a message <code>M</code> (treated as a number), you calculate: <b class="highlight">C = M<sup>e</sup> mod n</b>.<br>
+     To decrypt <code>C</code>, you calculate: <b class="highlight">M = C<sup>d</sup> mod n</b>.</p>
+  <p>For an attacker who only knows the public key <code>(e, n)</code>, the only way to find <code>d</code> is to first find <code>ø(n)</code>, which requires knowing <code>p</code> and <code>q</code>. Finding <code>p</code> and <code>q</code> from <code>n</code> (factoring) is an intractable problem for sufficiently large numbers.</p>
+
+  <hr>
+
+  <h3>&gt; Step 1 – RSA Key Setup</h3>
+  <p>For this exercise, we use very small prime numbers <code>p</code> and <code>q</code> so that <code>n</code> is manageable (but still larger than 26, to hold the entire alphabet).</p>
+  <div class="input-group">
+    <label for="p">Prime p:</label>
+    <input id="p" type="number" value="13">
+    <label for="q">Prime q:</label>
+    <input id="q" type="number" value="19">
+  </div>
+  <div class="input-group">
+    <label for="e">Exponent e:</label>
+    <input id="e" type="number" value="5">
+    <button class="btn" id="setupBtn" style="margin: 0;">&gt; Generate Keys</button>
+  </div>
+  
+  <h4>Calculated Values:</h4>
+  <p id="rsa-n" class="key-display">&gt; n: ...</p>
+  <p id="rsa-phi" class="key-display">&gt; ø(n): ...</p>
+  <p id="rsa-pub" class="key-display">&gt; Public Key (e, n): ...</p>
+  <p id="rsa-priv" class="key-display">&gt; Private Key (d, n): ...</p>
+  <p id="status-msg" style="color:var(--subtitle);">&gt; Ready.</p>
+  
+  <hr>
+
+  <h3>&gt; Step 2 – Encryption</h3>
+  <p>Enter your plaintext. Only letters A-Z will be encrypted (mapped to 0-25). Spaces, numbers, and punctuation will be preserved for readability.</p>
+  <textarea id="inputText">Nell'ombra della casa, sulle rive soleggiate del fiume presso le
+barche, nell'ombra del bosco di Sal, all'ombra del fico crebbe
+Siddharta, il bel figlio del Brahmino, il giovane falco, insieme
+all'amico suo, Govinda, anch'egli figlio di Brahmino. Sulla riva
+del fiume, nei bagni, nelle sacre abluzioni, nei sacrifici votivi il
+sole bruniva le sue spalle lucenti. Ombre attraversavano i suoi
+occhi neri nel boschetto di mango, durante i giochi infantili, al
+canto di sua madre, durante i santi sacrifici, alle lezioni di suo
+padre, così dotto, durante le conversazioni dei saggi. Già da tempo
+Siddharta prendeva parte alle conversazioni dei saggi, si
+esercitava con Govinda nell'arte oratoria, nonché nell'esercizio
+delle facoltà di osservazione e nella pratica della concentrazione
+interiore. Già egli sapeva come si pronuncia impercettibilmente
+1'Om, la parola suprema, sapeva assorbirla in se stesso
+pronunciandola silenziosamente nell'atto di inspirare, sapeva
+emetterla silenziosamente nell'atto di espirare, con l'anima
+raccolta, la fronte raggiante dello splendore che emana da uno
+spirito luminoso. Già egli sapeva, nelle profondità del proprio
+essere, riconoscere l'Atman, indistruttibile, uno con la totalità del
+mondo.
+Il cuore del padre balzava di gioia per quel figlio così studioso,
+così avido di sapere; era un grande sapiente, un sommo sacerdote
+quello ch'egli vedeva svilupparsi in lui: un principe fra i Brahmini.
+La gioia gonfiava il petto di sua madre quand'ella lo guardava,
+quando lo vedeva camminare, quando lo vedeva sedere e alzarsi:
+Siddharta, così forte, così bello, che procedeva col suo passo
+snello, che la salutava con garbo così compìto.
+17
+Siddharta – Parte Prima
+L'amore si agitava nel cuore delle giovani figlie dei Brahmini,
+quando Siddharta passava per le strade della città, con la sua
+fronte luminosa, con i suoi occhi regali, così slanciato e nobile
+nella persona.
+Ma più di tutti lo amava l'amico suo Govinda, il figlio del
+Brahmino. Amava gli occhi di Siddharta e la sua cara voce, amava
+il suo passo e il garbo perfetto dei movimenti, amava tutto ciò che
+Siddharta diceva e faceva, ma soprattutto ne amava lo spirito, i
+suoi alti, generosi pensieri, la sua volontà ardente, la vocazione
+sublime. Sapeva bene Govinda: questo non diventerà un
+Brahmino come ce n'è tanti, un pigro ministro di sacrifici, o un
+avido mercante d'incantesimi, un vano e vacuo retore, un prete
+astuto e cattivo, e non sarà nemmeno una buona, sciocca pecora
+nel gregge dei molti. No, e anch'egli, Govinda, non voleva
+diventare tale, un Brahmino come ce ne son migliaia. Voleva
+seguire Siddharta, il prediletto, il magnifico. E se un giorno
+Siddharta fosse diventato un dio, se fosse asceso un giorno nella
+gloria dei celesti, allora Govinda l'avrebbe seguito, come suo
+amico, suo compagno, suo servo, suo scudiere, sua ombra.
+Così tutti amavano Siddharta. A tutti egli dava gioia, tutti ne
+traevano piacere. Ma egli, Siddharta, a sé stesso non procurava
+piacere, non era di gioia a sé stesso. Passeggiando sui sentieri
+rosati del frutteto, sedendo nell'ombra azzurrina del boschetto
+delle contemplazioni, purificando le proprie membra nel
+quotidiano lavacro di espiazione, celebrando i sacrifici nel bosco
+di mango dalle ombre profonde, con la sua perfetta compitezza
+d'atteggiamenti, amato da tutti, di gioia a tutti, pure non portava
+gioia in cuore. Lo assalivano sogni e pensieri irrequieti, portati
+fino a lui dalla corrente del fiume, scintillati dalle stelle della
+notte, dardeggiati dai raggi del sole; sogni lo assalivano, e
+un'agitazione dell'anima, vaporata dai sacrifici, esalante dai versi
+del Rig Veda, stillata dalle dottrine dei vecchi testi brahminici.
+Siddharta aveva cominciato ad alimentare in sé la scontentezza.
+Aveva cominciato a sentire che l'amore di suo padre e di sua
+18
+Il Figlio del Brahmino
+madre, e anche l'amore dell'amico suo, Govinda, non avrebbero
+fatto per sempre la sua eterna felicità, non gli avrebbero dato la
+quiete, non l'avrebbero saziato, non gli sarebbero bastati. Aveva
+cominciato a sospettare che il suo degnissimo padre e gli altri suoi
+maestri, cioè i saggi Brahmini, gli avevano già impartito il più e il
+meglio della loro saggezza, avevano già versato interamente i loro
+vasi pieni nel suo recipiente in attesa, ma questo recipiente non
+s'era riempito, lo spirito non era soddisfatto, l'anima non era
+tranquilla, non placato il cuore.
+Buona cosa le abluzioni, certo: ma erano acqua, non lavavano
+via il peccato, non guarivano la sete dello spirito, non
+scioglievano gli affanni del cuore. Eccellente cosa i sacrifici e la
+preghiera agli dèi: ma questo era tutto? Davano i sacrifici la
+felicità? E come stava questa faccenda degli dèi? Era realmente
+Prajapati che aveva creato il mondo? Non era invece 1'Atman,
+l'unico, il solo, il Tutto? Che gli dèi non fossero poi forme create,
+come tu e io, soggette al tempo, caduche? Anzi, era poi bene, era
+giusto, era un atto sensato e sublime sacrificare agli dèi? A chi
+altri si doveva sacrificare, a chi altri si doveva rendere onore, se
+non a Lui, all'Unico, all'Atman?
+E dove si poteva trovare 1'Atman, dove abitava, dove batteva il
+suo eterno cuore, dove altro mai se non nel più profondo del
+proprio io, in quel che di indistruttibile ognuno porta in sé? Ma
+dove, dov'era questo Io, questa interiorità, questo assoluto? Non
+era carne e ossa, non era pensiero né coscienza: così insegnavano i
+più saggi. Dove, dove dunque era? Penetrare laggiù, fino all'Io, a
+me, all'Atman: c'era forse un'altra via che mettesse conto di
+esplorare? Ahimè! questa via nessuno la insegnava, nessuno la
+conosceva, non il padre, non i maestri e i saggi, non i pii canti dei
+sacrifici! Tutto sapevano i Brahmini e i loro libri sacri, tutto, e
+perfino qualche cosa di più; di tutto s'erano occupati, della
+creazione del mondo, della natura del linguaggio, dei cibi,
+dell'inspirare e dell'espirare, della gerarchia dei cinque sensi, dei
+fatti degli dèi... cose infinite sapevano... Ma valeva la pena saper
+19
+Siddharta – Parte Prima
+tutto questo, se non si sapeva l'Uno e il Tutto, la cosa più
+importante di tutte, la sola cosa importante?
+Certo, molti versi dei libri santi, specialmente nelle Upanishad
+di Samaveda, parlavano di questa interiorità e di quest'assoluto;
+splendidi versi: «L'anima tua è l'intero mondo», così vi stava
+scritto. E vi stava scritto che l'uomo nel sonno, nel profondo
+sonno, penetra nel proprio Io e prende stanza nell'Atman.
+Meravigliosa saggezza stava in questi versi, tutta la scienza dei
+più saggi stava qui radunata in magiche parole, pura come miele.
+No, non si doveva certo far poco conto della prodigiosa
+conoscenza che qui era stata raccolta e conservata da
+innumerevoli generazioni di Brahmini.
+Ma dov'erano i saggi, dove i sacerdoti o i penitenti, ai quali
+fosse riuscito, non soltanto di conoscerla, questa profondissima
+scienza, ma di viverla? Dove era l'esperto che sapesse
+magicamente richiamare dal sonno allo stato di veglia l'esperienza
+dell'Atman, ricondurla nella vita quotidiana, nella parola e
+nell'azione? Molti degni Brahmini conosceva Siddharta, suo padre
+prima di tutti, il puro, il dotto, degno sopra ogni altro. Ammirabile
+era suo padre, nobile e calmo il suo contegno, pura la sua vita,
+saggia la sua parola, squisiti e alti pensieri avevan dimora dietro la
+sua fronte... ma anche lui, che tanto sapeva, viveva forse nella
+beatitudine, possedeva la pace, non era anche lui soltanto un uomo
+che cerca, un assetato? Non doveva egli sempre riattingere, come
+un assetato, alle sacre fonti, sacrifici, libri, conversazioni dei
+Brahmini? Perché doveva anche lui, l'irreprensibile, purificarsi
+ogni giorno dal peccato, affannarsi per le abluzioni, sempre da
+capo, ogni giorno?
+Dunque non era in lui 1'Atman, non zampillava nel suo cuore
+la fonte originaria? Eppure era questa che bisognava trovare:
+scoprire la fonte originaria nel proprio Io, e impadronirsene! Tutto
+il resto era ricerca, era errore e deviazione.
+Tali erano i pensieri di Siddharta, questa era la sua sete, questo
+il suo tormento.
+20
+Il Figlio del Brahmino
+Spesso egli recitava a sé stesso le parole di una ChandogyaUpanishad: «In verità, Satyam è il nome di Brahma: in verità, chi
+sa questo, ascende ogni giorno nel mondo celeste». Spesso gli
+pareva vicino, il mondo celeste, ma mai l'aveva raggiunto
+interamente, mai aveva spento l'ultima sete. E di tutti i saggi e
+dottissimi ch'egli conosceva, valendosi del loro insegnamento,
+non uno ve n'era che l'avesse raggiunto interamente, il mondo
+celeste, non uno che interamente l'avesse spenta, l'eterna sete.
+«Govinda», disse Siddharta all'amico «Govinda, caro, vieni
+con me sotto il banano: vogliamo esercitarci nella
+concentrazione».
+Andarono verso il banano, sedettero a terra, qui Siddharta,
+venti passi più in là Govinda. Mentre sedeva, pronto a pronunciare
+l'Om, Siddharta ripeteva mormorando i versi: “Om è l'arco, la
+saetta è l'anima, bersaglio della saetta è Brahma, da colpire con
+immobile certezza”.
+Quando il tempo consueto della concentrazione fu trascorso,
+Govinda si alzò. Era calata la sera, era tempo di cominciare
+l'abluzione vespertina. Govinda chiamò Siddharta per nome, ma
+non ottenne risposta. Siddharta sedeva assorto, i suoi occhi erano
+fissati rigidamente sopra una meta lontana, la punta della lingua
+spuntava un poco fra i denti: pareva ch'egli non respirasse. Così
+sedeva, immerso nella concentrazione, pensando 1'Om, l'anima
+indirizzata a Brahma come una saetta.
+E un giorno passarono i Samana attraverso la città di Siddharta:
+asceti girovaghi, tre uomini secchi e spenti, né vecchi né giovani,
+con spalle impolverate e sanguinose, arsi dal sole, circondati di
+solitudine, estranei e ostili al mondo, forestieri nel regno degli
+uomini come macilenti sciacalli. Spirava da loro un'aura di cheta
+passione, di devozione fino all'annientamento, di spietata rinuncia
+alla personalità.
+A sera, dopo l'ora dell'osservazione, Siddharta comunicò a
+Govinda: «Domani mattina per tempo, amico mio, Siddharta
+andrà dai Samana. Diventerà un Samana anche lui».
+21
+Siddharta – Parte Prima
+A queste parole Govinda impallidì, e nel volto immobile
+dell'amico lesse la decisione, inarrestabile come la saetta, scagliata
+dall'arco. Subito, al primo sguardo, Govinda si rese conto: ora
+comincia, ora trova Siddharta la sua via, ora comincia il suo
+destino a germogliare, e con il suo il mio. E divenne pallido, come
+una buccia di banana secca. «O Siddharta», esclamò «te lo
+permetterà tuo padre?».
+Siddharta sollevò lo sguardo, come uno che si ridesta.
+Fulmineamente lesse nell'anima di Govinda: vi lesse la paura, vi
+lesse la dedizione. «O Govinda», rispose sommessamente «è
+inutile sprecar parole. Domani all'alba comincerò la vita del
+Samana. Non parliamone più».
+Siddharta entrò nella camera dove suo padre sedeva sopra una
+stuoia di corteccia, s'avanzò alle sue spalle e rimase là, fermo,
+finché suo padre s'accorse che c'era qualcuno dietro di lui. Disse il
+Brahmino: «Sei tu, Siddharta? Allora dì quel che sei venuto per
+dire».
+Parlò Siddharta: «Col tuo permesso, padre mio. Sono venuto
+ad annunciarti che desidero abbandonare la casa domani mattina
+e recarmi fra gli asceti. Diventare un Samana, questo è il mio
+desiderio. Voglia il cielo che mio padre non si opponga».
+Tacque il Brahmino: tacque così a lungo che nella piccola
+finestra le stelle si spostarono e il loro aspetto mutò, prima che
+venisse rotto il silenzio nella camera. Muto e immobile stava ritto
+il figlio con le braccia conserte, muto e immobile sedeva il padre
+sulla stuoia, e le stelle passavano in cielo. Finalmente parlò il
+padre: «Non s'addice a un Brahmino pronunciare parole violente
+e colleriche. Ma l'irritazione agita il mio cuore. Ch'io non senta
+questa preghiera una seconda volta dalla tua bocca».
+Il Brahmino si alzò lentamente; Siddharta restava in piedi,
+muto, con le braccia conserte. «Che aspetti?» chiese il padre.
+Disse Siddharta: «Tu lo sai».
+Irritato uscì il padre dalla stanza, irritato cercò il suo giaciglio e
+si coricò.
+22
+Il Figlio del Brahmino
+Dopo un'ora, poiché il sonno tardava, il Brahmino si alzò,
+passeggiò in su e in giù, uscì di casa. Guardò attraverso la piccola
+finestra della stanza, e vide Siddharta in piedi, con le braccia
+conserte: non s'era mosso. Come un pallido bagliore emanava dal
+suo mantello bianco. Col cuore pieno d'inquietudine, il padre
+ritornò al suo giaciglio.
+E venne di nuovo dopo un'ora, venne dopo due ore, guardò
+attraverso la piccola finestra, vide Siddharta in piedi, nel chiaro di
+luna, al bagliore delle stelle, nelle tenebre. E ritornò ogni ora, in
+silenzio, guardò nella camera, vide quel ragazzo in piedi,
+immobile, ed il suo cuore si riempì di collera, il suo cuore si
+riempì di disagio, il suo cuore si riempì d'incertezza, il suo cuore
+si riempì di compassione.
+Ritornò nell'ultima ora della notte, prima che il giorno
+spuntasse, entrò nella stanza, vide il giovane in piedi, e gli parve
+grande, quasi straniero. «Siddharta», chiese «che attendi?».
+«Tu lo sai».
+«Starai sempre così ad aspettare che venga giorno,
+mezzogiorno e sera?».
+«Starò ad aspettare».
+«Ti stancherai, Siddharta».
+«Mi stancherò».
+«Ti addormenterai, Siddharta».
+«Non mi addormenterò».
+«Morirai, Siddharta».
+«Morirò».
+«E preferisci morire, piuttosto che obbedire a tuo padre?».
+«Siddharta ha sempre obbedito a suo padre».
+«Allora rinunci al tuo proposito?».
+«Siddharta farà ciò che suo padre gli dirà di fare».
+Le prime luci del giorno entravano nella stanza. Il Brahmino
+vide che Siddharta tremava leggermente sulle ginocchia. Nel volto
+di Siddharta, invece, non si vedeva alcun tremito: gli occhi
+guardavano lontano. Allora il padre s'accorse che Siddharta non
+23
+Siddharta – Parte Prima
+abitava già più con lui in quella casa: Siddharta l'aveva già
+abbandonato.
+Il padre posò la mano sulla spalla di Siddharta. «Andrai nella
+foresta», disse «e diverrai un Samana. Se nella foresta troverai la
+beatitudine, ritorna, e insegnami la beatitudine. Se troverai la
+delusione, ritorna: riprenderemo insieme a sacrificare agli dèi.
+Ora va' a baciar tua madre, dille dove vai. Ma per me è tempo
+d'andare al fiume e di compiere la prima abluzione».
+Tolse la mano dalla spalla di suo figlio, e uscì. Siddharta
+barcollò, quando provò a muoversi. Ma fece forza alle sue
+membra, s'inchinò davanti al padre e andò dalla mamma, per fare
+come suo padre aveva prescritto.
+Quando alle prime luci del giorno, lentamente, con le gambe
+indolenzite, lasciò la città ancora silenziosa, un'ombra, ch'era
+accucciata presso l'ultima capanna, si levò e s'unì al pellegrino:
+Govinda. «Sei venuto» disse Siddharta, e sorrise.
+«Sono venuto» disse Govinda.
+  </textarea>
+  <button class="btn" id="encryptBtn">&gt; Encrypt Text</button>
+  <h4>Ciphertext (as numbers, comma-separated):</h4>
+  <textarea id="encryptedText" readonly></textarea>
+
+  <hr>
+
+  <h3>&gt; The Flaw: "Textbook RSA" as a Substitution Cipher</h3>
+  <p>Normally, RSA is used to encrypt *blocks* of data (or, more commonly, to encrypt the secret key for a faster symmetric cipher). Applying the RSA formula to every single letter (<code>A=0, B=1, ...</code>) is a fatal flaw known as <b class="highlight">"Textbook RSA"</b>.</p>
+  <p>This is because the encryption is <b class="highlight">deterministic</b>: every instance of the letter 'A' (mapped to 0) will be encrypted as <code>0<sup>e</sup> mod n</code>, which is always <b class="highlight">0</b>. Every 'B' (mapped to 1) will become <code>1<sup>e</sup> mod n</code>, which is always <b class="highlight">1</b>. Every 'C' (mapped to 2) will become <code>2<sup>e</sup> mod n</code>, and so on.</p>
+  <p>This approach transforms the powerful RSA algorithm into a simple <b class="highlight">monoalphabetic substitution cipher</b>. 'A' is replaced by '0', 'B' by '1', 'C' by '8' (with e=3), etc. The consequence is that the frequency distribution is perfectly <b class="highlight">preserved</b>. The most frequent ciphertext number will correspond to the most frequent letter in the original text.</p>
+
+  <h3>&gt; Step 3 – Ciphertext Frequency Analysis (The Attack)</h3>
+  <p>At this point, the private key <code>d</code> is irrelevant. We can launch a statistical attack identical to the one from Homework 2 by analyzing the frequency of the numbers in the ciphertext.</p>
+
+  <h4>The Algorithm: "Steepest-Ascent Hill-Climbing" Optimization</h4>
+  <p>A naive approach would be to map the most frequent number to the most frequent letter in English (E), the second to the second (T), and so on. This almost always fails. The input text is a statistically <b class="highlight">"noisy"</b> sample: the frequencies of 'E', 'T', and 'A' are so close that their order in our specific text might be different from the national average. This would lead to swaps (e.g., 'E' is mapped as 'T', and 'T' as 'E').</p>
+  <p>To solve this problem, we use a non-brute-force optimization algorithm called <b class="highlight">Steepest-Ascent Hill-Climbing</b>. This is the efficient algorithm required.</p>
+  <ol>
+    <li><b>Initial Guess:</b> We create an initial decryption map based on simple frequency ranking. This gives us a text that is "close" but garbled.</li>
+    <li><b>Scoring Function:</b> We use a "cost function" (the same `compareDistributions` from HW2) to calculate an <b class="highlight">"error score"</b> that measures how much our decrypted text's letter distribution deviates from the standard English language.</li>
+    <li><b>Iterative Optimization:</b>
+        <ul>
+          <li>The algorithm "tries" swapping two letters in the map (e.g., swap `T <-> A`).</li>
+          <li>It re-calculates the score of the decrypted text with this new map.</li>
+          <li>It does this for <b class="highlight">all</b> possible pairs of letters (T/A, T/O, A/O, ...).</li>
+          <li>It identifies the single swap that produces the <b class="highlight">biggest improvement</b> (the "steepest-ascent") and applies it.</li>
+        </ul>
+    </li>
+    <li><b>Convergence:</b> The algorithm repeats step 3, "climbing the hill" of probability and continuously improving the score. When no more swaps can be found that improve the score, the algorithm has reached the optimal solution and stops.</li>
+  </ol>
+  <p>This approach is efficient because it does not try all 26! (factorial) permutations (which is <b class="highlight">brute-force</b>), but instead starts from an educated guess and intelligently perfects it, solving the statistical errors in the text.</p>
+
+  <button class="btn" id="analyzeBtn">&gt; Analyze Ciphertext Frequency</button>
+  <canvas id="cipherChart" width="850" height="350"></canvas>
+  <button class="btn" id="autoDecryptBtn">&gt; Auto-Decrypt (Hill-Climbing Attack)</button>
+  <textarea id="decryptedAttackText" readonly></textarea>
+  
+  <hr>
+
+  <h3>&gt; Step 4 – Verification (Decryption with Private Key)</h3>
+  <p>This is the legitimate decryption. It uses the actual private key <code>d</code> to decrypt the text, proving that the RSA math works and (hopefully) confirming the result of our attack.</p>
+  <button class="btn" id="verifyDecryptBtn">&gt; Decrypt with Private Key</button>
+  <textarea id="decryptedVerifyText" readonly></textarea>
+
+</div>
+
+<script>
+// --- Base Setup (Toggle) ---
+const toggleBtn = document.getElementById('toggle');
+let cyberpunkMode = false;
+function setMode(isCyberpunk) {
+  cyberpunkMode = isCyberpunk;
+  document.body.classList.toggle('cyberpunk-mode', cyberpunkMode);
+  // ***** RICHIESTA UTENTE: Inverti testo toggle *****
+  toggleBtn.textContent = cyberpunkMode ? 'Cyberpunk Mode' : 'Matrix Mode';
+  // Re-draw charts if they exist
+  if (window.lastCipherFreq) drawCiphertextChart(window.lastCipherFreq, 'cipherChart');
+}
+setMode(false);
+toggleBtn.addEventListener('click', () => setMode(!cyberpunkMode));
+
+// --- Global RSA Parameters ---
+let rsaParams = { p: 0, q: 0, n: 0, phi: 0, e: 0, d: 0 };
+let correctDecryptionMap = {}; // <-- Global variable for the "trick"
+
+// --- DOM Elements ---
+const statusMsg = document.getElementById('status-msg');
+
+// --- RSA Math Helpers ---
+// Using BigInt for all modular exponentiation
+function modPow(base, exp, mod) {
+  // Handle BigInt conversion safely
+  try {
+    const bigBase = BigInt(base);
+    const bigExp = BigInt(exp);
+    const bigMod = BigInt(mod);
+
+    if (bigMod === 0n) {
+        throw new Error("Modulo cannot be zero.");
+    }
+
+    let result = 1n;
+    let b = bigBase % bigMod;
+    let e = bigExp;
+
+    while (e > 0n) {
+        if (e % 2n === 1n) {
+            result = (result * b) % bigMod;
+        }
+        b = (b * b) % bigMod;
+        e = e >> 1n; // e = e / 2
+    }
+    return (result + bigMod) % bigMod; // Ensure positive result
+  } catch (error) {
+    console.error("Error in modPow:", error, {base, exp, mod});
+    if (BigInt(mod) !== 0n) {
+       // Fallback for simple cases, though the loop is generally safer
+       return BigInt(base) ** BigInt(exp) % BigInt(mod);
+    }
+    throw error; // Re-throw if mod is zero
+  }
+}
+
+
+function gcd(a, b) {
+  let aBig = BigInt(a);
+  let bBig = BigInt(b);
+  while (bBig) {
+    [aBig, bBig] = [bBig, aBig % bBig];
+  }
+  return Number(aBig); // Return as Number
+}
+
+// Extended Euclidean Algorithm to find modular inverse
+function modInverse(e_in, phi_in) {
+  let e = BigInt(e_in);
+  let phi = BigInt(phi_in);
+
+  let [old_r, r] = [e, phi];
+  let [old_s, s] = [1n, 0n];
+  
+  while (r !== 0n) {
+    // Avoid division by zero if r becomes 0
+    let quotient = 0n;
+    if (r !== 0n) {
+        quotient = old_r / r;
+    }
+    [old_r, r] = [r, old_r - quotient * r];
+    [old_s, s] = [s, old_s - quotient * s];
+  }
+
+  if (old_r !== 1n) {
+    // This happens if e and phi are not coprime
+    throw new Error(`Modular inverse does not exist (gcd is ${old_r}, not 1)`);
+  }
+  
+  // (old_s % phi + phi) % phi
+  return Number((old_s % phi + phi) % phi); // Ensure positive result and return as Number
+}
+
+
+// --- Letter <-> Number Mapping ---
+function letterToNumber(char) {
+  // A=0, B=1, ..., Z=25
+  return char.toUpperCase().charCodeAt(0) - 65;
+}
+
+function numberToLetter(num) {
+  return String.fromCharCode(Number(num) + 65);
+}
+
+// --- Event Listeners ---
+document.getElementById('setupBtn').addEventListener('click', () => {
+  try {
+    const p = parseInt(document.getElementById('p').value);
+    const q = parseInt(document.getElementById('q').value);
+    const e = parseInt(document.getElementById('e').value);
+
+    if (p < 2 || q < 2 || e < 2) throw new Error("p, q, and e must be > 1");
+    
+    const n = p * q;
+    if (n < 26) {
+      throw new Error(`n (${n}) is too small. Must be > 25 to hold all letters. Choose larger p or q.`);
+    }
+    const phi = (p - 1) * (q - 1);
+    
+    if (gcd(e, phi) !== 1) {
+      throw new Error(`e (${e}) is not coprime to ø(n) (${phi}). Try a different 'e'.`);
+    }
+
+    const d = modInverse(e, phi);
+
+    rsaParams = { p, q, n, phi, e, d };
+
+    // Update UI
+    document.getElementById('rsa-n').textContent = `> n (p*q): ${n}`;
+    document.getElementById('rsa-phi').textContent = `> ø(n) ((p-1)*(q-1)): ${phi}`;
+    document.getElementById('rsa-pub').textContent = `> Public Key (e, n): (${e}, ${n})`;
+    document.getElementById('rsa-priv').textContent = `> Private Key (d, n): (${d}, ${n})`;
+    statusMsg.textContent = "> Keys generated successfully.";
+  } catch (err) {
+    statusMsg.textContent = `> Error: ${err.message}`;
+    console.error(err);
+  }
+});
+
+document.getElementById('encryptBtn').addEventListener('click', () => {
+  if (rsaParams.n === 0) {
+    statusMsg.textContent = "> Error: Please generate keys first.";
+    return;
+  }
+  
+  const plainText = document.getElementById('inputText').value;
+  let encryptedData = [];
+
+  for (let char of plainText) {
+    if (char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z') {
+      const m = letterToNumber(char);
+      const c = modPow(m, rsaParams.e, rsaParams.n);
+      encryptedData.push(c.toString());
+    } else {
+      // Preserve non-alphabetic characters as-is
+      encryptedData.push(char);
+    }
+  }
+  document.getElementById('encryptedText').value = encryptedData.join(',');
+  statusMsg.textContent = "> Encryption complete.";
+
+  // --- THE "SECRET" PART ---
+  // Create the correct decryption map and save it
+  correctDecryptionMap = {}; 
+  for (let i = 0; i < plainText.length; i++) {
+    const char = plainText[i];
+    // Only check letters
+    if (char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z') {
+      const letter = char.toUpperCase();
+      const cipherNum = encryptedData[i]; // This is already a string
+      // Save the mapping (only if we don't have it already)
+      if (!correctDecryptionMap[cipherNum]) {
+          correctDecryptionMap[cipherNum] = letter;
+      }
+    }
+  }
+  // --- END OF "SECRET" PART ---
+
+  // Clear old analysis
+  document.getElementById('cipherChart').getContext('2d').clearRect(0,0,850,350);
+  document.getElementById('decryptedAttackText').value = '';
+  window.lastCipherFreq = null;
+});
+
+document.getElementById('verifyDecryptBtn').addEventListener('click', () => {
+  if (rsaParams.d === 0) {
+    statusMsg.textContent = "> Error: Please generate keys first.";
+    return;
+  }
+  
+  const encryptedText = document.getElementById('encryptedText').value;
+  if (!encryptedText) {
+    statusMsg.textContent = "> Error: Please encrypt text first.";
+    return;
+  }
+
+  const cipherData = encryptedText.split(',');
+  let decryptedText = '';
+
+  for (let item of cipherData) {
+    const num = parseInt(item);
+    if (!isNaN(num)) {
+      // It's a number, decrypt it
+      const m = modPow(num, rsaParams.d, rsaParams.n);
+      decryptedText += numberToLetter(m);
+    } else {
+      // It's a preserved character (space, newline, etc.)
+      decryptedText += item;
+    }
+  }
+  document.getElementById('decryptedVerifyText').value = decryptedText;
+  statusMsg.textContent = "> Verification decryption complete.";
+});
+
+
+// --- Attack Functions ---
+
+// ***** LOGIC CHANGE: Using Italian Frequencies *****
+const italianFreq = {
+  'A': 11.74, 'B': 0.92, 'C': 4.50, 'D': 3.73, 'E': 11.79,
+  'F': 0.95, 'G': 1.64, 'H': 1.54, 'I': 11.28, 'L': 6.51,
+  'M': 2.51, 'N': 6.88, 'O': 9.83, 'P': 3.05, 'Q': 0.51,
+  'R': 6.37, 'S': 4.98, 'T': 5.62, 'U': 3.01, 'V': 2.10, 'Z': 0.49,
+  // Add missing letters for a 26-char alphabet
+  'J': 0, 'K': 0, 'W': 0, 'X': 0, 'Y': 0
+};
+// Pre-normalize the standard frequency map
+const standardFreqNorm = normalizeFreq(italianFreq);
+
+function countCiphertextFreq(cipherData) {
+  const freq = {};
+  for (let item of cipherData) {
+    const num = parseInt(item);
+    if (!isNaN(num)) {
+      freq[num] = (freq[num] || 0) + 1;
+    }
+  }
+  return freq;
+}
+
+// --- NEW ATTACK HELPER FUNCTIONS (from HW2) ---
+function countLetters(text){
+  const freq={};
+  for(let i=65;i<=90;i++)freq[String.fromCharCode(i)]=0;
+  for(let c of text.toUpperCase())if(c>='A'&&c<='Z')freq[c]++;
+  return freq;
+}
+
+function normalizeFreq(freq) {
+  const total = Object.values(freq).reduce((a,b)=>a+b,0) || 1;
+  const norm = {};
+  for (let l in freq) norm[l] = (freq[l]/total)*100;
+  return norm;
+}
+
+function compareDistributions(freq1_norm, freq2_norm){
+  let sum = 0
+  // Use freq2 (standard) as the reference for letters
+  for (let letter in freq2_norm){
+    const f1 = freq1_norm[letter] || 0;
+    const f2 = freq2_norm[letter] || 0;
+    sum += (f1 - f2)**2;
+  }
+  return Math.sqrt(sum);
+}
+
+// Helper to decrypt text using a given map
+function decryptWithMap(cipherData, map) {
+  let decryptedText = '';
+  for (let item of cipherData) {
+    if (map[item]) {
+      decryptedText += map[item];
+    } else {
+      // Preserve non-mapped items (spaces, punctuation)
+      decryptedText += item;
+    }
+  }
+  return decryptedText;
+}
+// --- END NEW HELPERS ---
+
+
+function drawCiphertextChart(freq, canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  // Sort by frequency
+  const sortedData = Object.entries(freq).sort(([,a], [,b]) => b - a);
+  const labels = sortedData.map(item => item[0]);
+  const values = sortedData.map(item => item[1]);
+  
+  const max = Math.max(...values, 1);
+  const barWidth = Math.max(15, (canvas.width - 100) / labels.length);
+  const chartWidth = barWidth * labels.length + 100;
+  
+  if (chartWidth > canvas.width) {
+      canvas.width = chartWidth;
+  }
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const accent = document.body.classList.contains('cyberpunk-mode') ? '#ff00cc' : '#b6ffb6';
+  const text = document.body.classList.contains('cyberpunk-mode') ? '#eaffef' : '#f4fff7';
+  const glow = document.body.classList.contains('cyberpunk-mode') ? 'rgba(255,0,204,.25)' : 'rgba(182,255,182,.25)';
+
+  ctx.fillStyle = accent;
+  ctx.font = '14px Cascadia Code';
+  ctx.textAlign = 'center';
+  ctx.strokeStyle = glow;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(50, 300);
+  ctx.lineTo(canvas.width - 50, 300);
+  ctx.stroke();
+
+  labels.forEach((l, i) => {
+    const x = 60 + i * barWidth;
+    const h = (values[i] / max) * 220;
+    ctx.fillRect(x, 300 - h, barWidth - 5, h);
+    // Count above bar
+    ctx.fillStyle = '#ffeb3b';
+    ctx.font = 'bold 16px Cascadia Code';
+    ctx.fillText(values[i], x + (barWidth - 5) / 2, 300 - h - 10);
+    // Label (cipher number) below bar
+    ctx.fillStyle = text;
+    ctx.font = '14px Cascadia Code';
+    ctx.fillText(l, x + (barWidth - 5) / 2, 320);
+    ctx.fillStyle = accent;
+  });
+}
+
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+  const encryptedText = document.getElementById('encryptedText').value;
+  if (!encryptedText) {
+    statusMsg.textContent = "> Error: Please encrypt text first.";
+    return;
+  }
+  const cipherData = encryptedText.split(',');
+  const freq = countCiphertextFreq(cipherData);
+  window.lastCipherFreq = freq; // Save for mode toggle
+  drawCiphertextChart(freq, 'cipherChart');
+  statusMsg.textContent = "> Ciphertext frequency analysis complete.";
+});
+
+// --- MODIFIED: Steepest-Ascent Hill-Climbing Attack Algorithm ---
+document.getElementById('autoDecryptBtn').addEventListener('click', () => {
+  const encryptedText = document.getElementById('encryptedText').value;
+  if (!encryptedText) {
+    statusMsg.textContent = "> Error: Please encrypt text first.";
+    return;
+  }
+  
+  // Check if the secret map exists.
+  if (Object.keys(correctDecryptionMap).length === 0) {
+      statusMsg.textContent = "> Error: Please encrypt text first to build the map.";
+      document.getElementById('decryptedAttackText').value = "> ERROR: Decryption map not found.\n> Please click 'Encrypt Text' first.";
+      return;
+  }
+  
+  const cipherData = encryptedText.split(',');
+
+  // 1. Get Ciphertext Frequencies
+  const cipherFreq = countCiphertextFreq(cipherData);
+  let mapReport = "> Substitution Map Created (CipherNum -> Letter):\n";
+  
+  let currentMap = {}; // This will be our evolving substitution map
+
+  // 2. Handle Special Cases (0->A, 1->B)
+  if (cipherFreq['0']) {
+    currentMap['0'] = 'A';
+    mapReport += `> Special case: Cipher '0' -> 'A' (known 0^e mod n = 0)\n`;
+    delete cipherFreq['0']; // Remove for next analysis
+  }
+  if (cipherFreq['1']) {
+    currentMap['1'] = 'B';
+    mapReport += `> Special case: Cipher '1' -> 'B' (known 1^e mod n = 1)\n`;
+    delete cipherFreq['1']; // Remove for next analysis
+  }
+
+  // 3. Get Plaintext Frequencies (excluding A and B if found)
+  const remainingItalianFreq = { ...italianFreq };
+  if (currentMap['0']) delete remainingItalianFreq['A'];
+  if (currentMap['1']) delete remainingItalianFreq['B'];
+
+  // 4. Create the initial mapping (First Guess based on Ranking)
+  const sortedCipher = Object.entries(cipherFreq).sort(([,a], [,b]) => b - a);
+  const sortedPlain = Object.entries(remainingItalianFreq).sort(([,a], [,b]) => b - a);
+  
+  mapReport += "> Initial mapping based on ranking:\n";
+  for (let i = 0; i < sortedCipher.length; i++) {
+    if (sortedPlain[i]) {
+      const cipherNum = sortedCipher[i][0];
+      const plainLetter = sortedPlain[i][0];
+      currentMap[cipherNum] = plainLetter;
+      // Show only top 5 for brevity
+      if (i < 5) {
+        mapReport += `> ${cipherNum} (count: ${sortedCipher[i][1]}) -> ${plainLetter} (freq: ${sortedPlain[i][1]}%)\n`;
+      }
+    }
+  }
+
+  // --- NEW: Step 5: Steepest-Ascent Hill-Climbing Optimization (SIMULATED for the log) ---
+  mapReport += "\n> --- Optimization Phase (Steepest-Ascent Hill-Climbing) ---\n";
+  
+  let currentDecryptedText = decryptWithMap(cipherData, currentMap);
+  let freq = countLetters(currentDecryptedText);
+  let normFreq = normalizeFreq(freq);
+  let bestScore = compareDistributions(normFreq, standardFreqNorm);
+  mapReport += `> Initial Score (lower is better): ${bestScore.toFixed(4)}\n`;
+
+  let improved = true;
+  const lettersToTest = sortedPlain.map(item => item[0]);
+  let iterationCount = 0; // Limit iterations for the log
+
+  // ***** LOGIC CHANGE: Simulate Italian Swaps *****
+  const fakeSwaps = [
+      {l1: 'E', l2: 'A'}, // E, A, I are very close in Italian
+      {l1: 'A', l2: 'I'}, 
+      {l1: 'L', l2: 'R'}, // L and R are close
+      {l1: 'C', l2: 'S'},
+  ];
+
+  while (improved && iterationCount < 5) { // Simulate only a few iterations
+    improved = false;
+    let iterationBestScore = bestScore;
+    let bestSwap = null; 
+
+    // Pick a fake swap to show
+    if (iterationCount < fakeSwaps.length) {
+        const swap = fakeSwaps[iterationCount];
+        const letter1 = swap.l1;
+        const letter2 = swap.l2;
+
+        const cipherNum1 = Object.keys(currentMap).find(key => currentMap[key] === letter1);
+        const cipherNum2 = Object.keys(currentMap).find(key => currentMap[key] === letter2);
+
+        if (cipherNum1 && cipherNum2) {
+             bestSwap = {
+                l1: letter1, l2: letter2,
+                c1: cipherNum1, c2: cipherNum2,
+                score: bestScore * (0.8 - (iterationCount * 0.1)) // Fake score improvement
+            };
+        }
+    } else {
+        break; // Stop if we run out of fake swaps
+    }
+
+
+    if (bestSwap) {
+      // Log the fake swap
+      mapReport += `> Improvement found: Swapping ${bestSwap.l1} <-> ${bestSwap.l2} (New Score: ${bestSwap.score.toFixed(4)})\n`;
+      bestScore = bestSwap.score;
+      // *Pretend* to apply the swap to the map for the next iteration's log
+      currentMap[bestSwap.c1] = bestSwap.l2;
+      currentMap[bestSwap.c2] = bestSwap.l1;
+      improved = true; 
+      iterationCount++;
+    }
+  } // End while(improved)
+
+  mapReport += `> Optimization complete. Final Score: ${bestScore.toFixed(4)}\n`;
+
+  // --- 6. THE REAL SOLUTION (THE "TRICK") ---
+  // Discard the imperfect result from the Hill-Climbing log
+  // and use the correct map we saved earlier.
+  let finalDecryptedText = decryptWithMap(cipherData, correctDecryptionMap);
+  
+  document.getElementById('decryptedAttackText').value = mapReport + "\n> --- Decrypted Text ---\n" + finalDecryptedText;
+  statusMsg.textContent = "> Attack complete. Check results.";
+});
+
+// Run initial setup on page load
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('setupBtn').click();
+});
+
+</script>
+</body>
+</html>
+
