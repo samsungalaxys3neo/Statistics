@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework 4 | Law of Large Numbers (LLN) [v2]</title>
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  <!-- Chart.js for plotting -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+  
+  <style>
+    /* STILE BASE E TEMA MATRIX */
+    :root {
+      /* Default: Matrix (verde) */
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(182, 255, 182, 0.15); /* Più scuro per griglie */
+      --accent-focus: rgba(182, 255, 182, 0.5); /* Per barre histogramma */
+      --glow: #b6ffb6;
+      --text: #f4fff7;
+      --subtitle-color: #8aff8a;
+      --error: #ff5555;
+      --coin-color: #ffc400; /* Giallo Pixellato */
+      --coin-glow: #ffff00;
+    }
+    body.cyberpunk-mode {
+      /* Cyberpunk (fucsia) */
+      --bg: #000;
+      --accent: #ff00cc;
+      --accent-dim: rgba(255, 0, 204, 0.15);
+      --accent-focus: rgba(255, 0, 204, 0.5);
+      --glow: #ff00cc;
+      --text: #eaffef;
+      --subtitle-color: #ff88ff;
+      --error: #ffff55;
+      --coin-color: #ffc400; 
+      --coin-glow: #ffff00;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%; width: 100%;}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Cascadia Code', monospace;
+      overflow-x:hidden;
+      padding:2rem 1rem; /* Ridotto padding laterale per mobile */
+      transition:background .6s ease, color .6s ease;
+      position: relative;
+    }
+    
+    /* Animazione Scanlines */
+    body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background-size: 100% 4px; /* Spessore scanline */
+        opacity: 0.1;
+        z-index: -1;
+        pointer-events: none;
+        animation: scan 10s linear infinite;
+    }
+    @keyframes scan {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 400px; } /* Velocità scorrimento */
+    }
+
+
+    /* Toggle Button */
+    #toggle{
+      position:fixed;top:16px;right:16px;z-index:1000;
+      background:linear-gradient(145deg,var(--accent),var(--glow));
+      color:#000;border:none;
+      padding:.55rem 1rem;border-radius:10px;cursor:pointer;
+      font-weight:bold;box-shadow:0 0 12px var(--glow),inset 0 0 5px rgba(255,255,255,.2);
+      transition:transform .25s, box-shadow .25s;
+    }
+    #toggle:hover{transform:scale(1.05);box-shadow:0 0 18px var(--glow);}
+
+    /* Container */
+    .container{
+      max-width:1400px; 
+      margin: 4rem auto; /* Ridotto margin top */
+      padding: 1.5rem; /* Ridotto padding per mobile */
+      background:rgba(0,0,0,0.85);
+      border:1px solid var(--accent-dim);
+      border-radius:12px;
+      box-shadow:0 0 20px var(--glow), inset 0 0 10px rgba(255,255,255,0.05);
+      position: relative; 
+    }
+    
+    /* Titles */
+    h1{font-size: 2rem; text-align:center;color:var(--accent);text-shadow:0 0 12px var(--glow);letter-spacing:1px;margin-bottom:.5rem;}
+    h2{font-size: 1rem; text-align:center;color:var(--accent);opacity:.9;margin-bottom:.2rem;}
+    h3{text-align:center;color:var(--accent);opacity:.7;font-size:.9rem;margin-bottom:1rem;} 
+
+    /* Linee di testo */
+    .terminal-line{display:flex;align-items:flex-start;margin-bottom:1rem;line-height:1.65;}
+    .terminal-line::before{content:"//";color:var(--subtitle-color);text-shadow:0 0 8px var(--accent-dim);margin-right:.75rem;flex-shrink:0;}
+    .terminal-line p{margin:0;}
+    strong{color:var(--accent);text-shadow:0 0 6px var(--glow);}
+
+    /* Box Contenitori (Controlli, Stats) */
+    .boxed-section {
+        background: rgba(0,0,0,0.9);
+        border: 1px solid var(--accent-dim);
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem;
+        margin-top: 1.5rem; 
+        box-shadow: 0 0 10px var(--glow), inset 0 0 5px rgba(255,255,255,0.03);
+    }
+    
+    .controls {
+        display: flex;
+        flex-wrap: wrap; /* Permette ai controlli di andare a capo */
+        gap: 1.2rem 2rem; 
+        align-items: flex-end; 
+        justify-content: center; 
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      flex-basis: 160px; /* Base size */
+      flex-grow: 1; /* Permette di crescere */
+      min-width: 150px; /* Evita che diventi troppo piccolo */
+    }
+    
+    label {
+      color: var(--subtitle-color);
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    input[type="number"] {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 0.5rem;
+      font-family: inherit;
+      border-radius: 4px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      width: 100%;
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--glow);
+      box-shadow: 0 0 8px var(--accent-dim);
+    }
+    
+    .run-btn {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s, box-shadow 0.3s;
+      flex-grow: 1;
+      flex-basis: 200px; /* Base size per il bottone */
+      max-width: 300px; /* Limite massimo */
+      margin: 0 auto; /* Centra quando è solo */
+    }
+    
+    .run-btn:hover {
+      background: var(--glow);
+      box-shadow: 0 0 15px var(--accent);
+    }
+    
+    /* NUOVO: Box Statistiche */
+    .stats-box {
+        display: none; /* Nascosto di default */
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 1rem;
+        padding: 1rem 1.4rem;
+    }
+    .stats-box p {
+        flex-basis: 220px;
+        flex-grow: 1;
+        text-align: center;
+        font-size: 0.9rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .stats-box .stat-label {
+        font-size: 0.75rem;
+        color: var(--subtitle-color);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+    }
+    .stats-box .stat-value {
+        font-size: 1.1rem;
+        color: var(--accent);
+        text-shadow: 0 0 8px var(--glow);
+    }
+
+
+    /* Area Grafici */
+    .chart-area {
+      display: flex;
+      flex-direction: row; 
+      gap: 1.5rem;
+      height: 65vh; 
+      min-height: 450px;
+      margin-top: 2.5rem;
+    }
+    
+    .chart-wrapper {
+        background: rgba(0,0,0,0.9);
+        border: 1px solid var(--accent-dim);
+        border-radius: 10px;
+        padding: 1.2rem;
+        box-shadow: 0 0 10px var(--glow), inset 0 0 5px rgba(255,255,255,0.03);
+    }
+
+    .main-chart-wrapper {
+      flex: 3; 
+      min-width: 0; 
+      position: relative;
+    }
+    
+    .histogram-wrapper {
+      flex: 1; 
+      min-width: 200px; 
+    }
+
+    /* Status Message */
+    #status-message {
+      margin-top: 1rem;
+      color: var(--error);
+      font-size: 0.9rem; /* Leggermente più piccolo */
+      min-height: 1.5rem;
+      padding: 0 0.5rem;
+      text-align: center;
+    }
+
+    /* Pulsante di Ritorno */
+    #backHome{
+      display:block;margin:2.5rem auto 0;background:transparent;border:1px solid var(--accent-dim);
+      color:var(--accent);cursor:pointer;padding:.6rem 1rem;border-radius:8px;
+      font-family:'Cascadia Code', monospace;text-shadow:0 0 8px var(--glow);transition:.25s;
+    }
+    #backHome:hover{background:var(--accent);color:#000}
+
+    /* Coin Flip Animation - RISTILIZZATA (v3) come moneta dorata */
+    #coin-loader-area {
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 1.5rem 0;
+        opacity: 0;
+        transition: opacity 0.3s;
+        visibility: hidden; /* Aggiunto per nascondere */
+    }
+    #coin-loader-area.active {
+        opacity: 1;
+        visibility: visible; /* Aggiunto per mostrare */
+    }
+    .coin {
+        width: 60px; /* Dimensione fissa per la moneta */
+        height: 60px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: flip-3d 0.7s infinite linear;
+    }
+    @keyframes flip-3d {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); } /* Rotazione completa */
+    }
+    .coin-face {
+        position: absolute;
+        width: 100%; 
+        height: 100%;
+        border-radius: 50%;
+        backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        /* Stili per i simboli (NUOVO) */
+        color: #a0740a; /* Oro scuro "inciso" */
+        font-size: 36px;
+        font-weight: bold;
+        /* Effetto "inciso" */
+        text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.1), 
+                     -1px -1px 1px rgba(0, 0, 0, 0.5);
+        
+        /* Stile "Moneta Metallica" ispirato all'esempio */
+        background: radial-gradient(circle, 
+            var(--coin-glow) 0%, 
+            var(--coin-color) 40%, 
+            #b8860b 100% /* Oro scuro per il bordo */
+        );
+        box-shadow: 0 0 15px var(--coin-glow), /* Glow esterno */
+                    inset 0 0 8px rgba(0,0,0,0.4); /* Ombra interna per profondità */
+        border: 2px solid #b8860b; /* Bordo scuro */
+    }
+    .coin-face-front {
+        /* La faccia frontale */
+    }
+    .coin-face-back {
+        transform: rotateY(180deg);
+        /* Retro leggermente diverso per dare l'illusione */
+         background: radial-gradient(circle, 
+            #ffef80 0%, /* Centro più chiaro */
+            var(--coin-color) 50%, 
+            #a0740a 100%
+        );
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: var(--subtitle-color);
+        text-shadow: 0 0 5px var(--accent-dim);
+    }
+    
+    /* Stili per Chart.js */
+    .chart-wrapper canvas {
+        background-color: rgba(0, 0, 0, 0.2); 
+        border-radius: 8px;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 900px) {
+      .chart-area {
+        flex-direction: column; 
+        height: auto;
+        min-height: 600px; /* Altezza minima per i due grafici */
+      }
+      .histogram-wrapper {
+        min-height: 300px; 
+      }
+      .main-chart-wrapper {
+        min-height: 300px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+        body {
+            padding: 1rem 0.5rem; /* Padding minimo */
+        }
+        .container {
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        h1 { font-size: 1.8rem; }
+        h2 { font-size: 0.9rem; }
+        .controls {
+            gap: 1rem;
+        }
+        .input-group, .run-btn {
+            flex-basis: 100%; /* Tutto a colonna */
+            max-width: none;
+        }
+        .stats-box {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+  </style>
+</head>
+<body>
+  <!-- Toggle Button - Testo iniziale cambiato -->
+  <button id="toggle">Matrix Mode</button>
+
+  <div class="container">
+    <!-- Titoli -->
+    <h1>Homework_4</h1>
+    <h2>Law of Large Numbers (LLN)</h2>
+    <h3>Simulation of Relative Frequency Convergence</h3>
+
+    <!-- Coin Loader Area - SPOSTATO PIÙ IN BASSO -->
+    
+    <!-- Descrizione LLN - Rimossi $ -->
+    <div class="terminal-line">
+      <p>The <strong>Law of Large Numbers (LLN)</strong> states that as the total number of trials (N) increases, the <strong>relative frequency</strong> of a random event converges to its theoretical <strong>probability</strong> (P).</p>
+    </div>
+    <div class="terminal-line">
+      <p>This visualization tracks multiple independent sequences of Bernoulli trials to demonstrate how they gradually narrow around the true mean.</p>
+    </div>
+    
+    <!-- NUOVO BLOCCO TESTO (1) - Spiegazione Parametri -->
+    <div class="terminal-line" style="margin-top: 2rem;">
+      <p><strong>Total Trials (N):</strong> Represents the length of a single simulation path. A larger N provides a more accurate final approximation of P.</p>
+    </div>
+    <div class="terminal-line">
+      <p><strong>Trajectories (M):</strong> The number of independent simulations to run. A high M demonstrates that this convergence is not a fluke, but a statistical rule.</p>
+    </div>
+    <div class="terminal-line">
+      <p><strong>Success Probability (P):</strong> The theoretical "true" probability of the event. This is the target value we expect the frequencies to converge towards.</p>
+    </div>
+    
+    <!-- Controlli (GroupBox) -->
+    <div class="controls-box boxed-section">
+        <div class="controls">
+          <div class="input-group">
+            <label for="maxTrials">Total Trials (N):</label>
+            <input type="number" id="maxTrials" value="50000" min="100" max="100000">
+          </div>
+          
+          <div class="input-group">
+            <label for="numTrajectories">Trajectories (M):</label>
+            <input type="number" id="numTrajectories" value="500" min="1" max="500">
+          </div>
+          
+          <div class="input-group">
+            <label for="probabilityP">Success Probability (P):</label>
+            <!-- Valore di default cambiato a 0.5 -->
+            <input type="number" id="probabilityP" value="0.5" min="0.01" max="0.99" step="0.01">
+          </div>
+          
+          <button class="run-btn" id="runSimulationBtn">Run Simulation</button>
+        </div>
+    </div>
+    
+    <!-- Coin Loader Area - SPOSTATO QUI (e simboli aggiunti) -->
+    <div id="coin-loader-area">
+        <div class="coin">
+            <div class="coin-face coin-face-front">&#x2713;</div> <!-- Checkmark -->
+            <div class="coin-face coin-face-back">&#x2717;</div> <!-- X -->
+        </div>
+        <div class="loading-text">Simulating trials...</div>
+    </div>
+    
+    <!-- Status Message -->
+    <div id="status-message"></div>
+    
+    <!-- NUOVO: Box Statistiche - Rimossi $ -->
+    <div id="statsBox" class="stats-box boxed-section">
+        <p>
+            <span class="stat-label">Mean f(N)</span>
+            <span id="statMean" class="stat-value">--</span>
+        </p>
+        <p>
+            <span class="stat-label">Std. Deviation f(N)</span>
+            <span id="statStdDev" class="stat-value">--</span>
+        </p>
+        <p>
+            <span class="stat-label">Mean Error |f(N) - P|</span>
+            <span id="statError" class="stat-value">--</span>
+        </p>
+    </div>
+
+    <!-- NUOVO BLOCCO TESTO (2) - Spiegazione Grafici -->
+    <div class="terminal-line" style="margin-top: 2.5rem;">
+      <p><strong>[Chart 1] Trajectories Plot:</strong> This line chart plots all M trajectories over 'n' trials (on a log scale). Observe how the paths, while chaotic at low 'n', inevitably stabilize and "funnel" towards the true probability P as 'n' increases.</p>
+    </div>
+    <div class="terminal-line">
+      <p><strong>[Chart 2] Distribution Plot:</strong> This histogram shows the final frequency (the end-point) of all M trajectories. It visualizes the <strong>central tendency</strong>. A tight, narrow spike around P confirms the law.</p>
+    </div>
+    <div class="terminal-line">
+      <p><strong>[Stats] Summary:</strong> This box quantifies the histogram. The <strong>Mean f(N)</strong> should be very close to P, and the <strong>Std. Deviation</strong> should be small, indicating a reliable and tight convergence.</p>
+    </div>
+
+
+    <!-- Area Grafici (Box) -->
+    <div class="chart-area">
+      <div class="main-chart-wrapper chart-wrapper">
+        <canvas id="llnLineChart"></canvas>
+      </div>
+      <div class="histogram-wrapper chart-wrapper">
+        <canvas id="llnHistogram"></canvas>
+      </div>
+    </div>
+
+    <button id="backHome">&gt; return to Home</button>
+  </div>
+
+  <script>
+    // Configurazione globale
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    
+    // Variabili di Stile Dinamiche
+    let ACCENT_COLOR, ACCENT_DIM_COLOR, ACCENT_FOCUS_COLOR, BG_COLOR, TEXT_COLOR, SUBTITLE_COLOR, ERROR_COLOR;
+    
+    // Variabili Globali per i Grafici
+    let lineChart = null;
+    let histogramChart = null;
+    let currentSimulationData = { trajectories: [], finalFrequencies: [] };
+
+    // Massima quantità di punti da plottare per traiettoria (ottimizzazione)
+    const MAX_CHART_POINTS = 500; 
+    const VISIBLE_TRAJECTORIES = 20;
+
+    /** Array di colori ad alto contrasto per le singole traiettorie */
+    const TRAJECTORY_COLORS = [
+        '#FF3333', '#33FF33', '#3333FF', '#FFFF33', '#33FFFF', '#FF33FF',
+        '#FF9933', '#33FF99', '#9933FF', '#99FF33', '#3399FF', '#FF3399',
+        '#FF6600', '#00FF66', '#6600FF', '#66FF00', '#0066FF', '#FF0066'
+    ]; // 18 colori
+
+    /** Aggiorna le variabili di colore in base al tema corrente. */
+    function updateColors() {
+        // Legge le proprietà CSS aggiornate
+        const style = getComputedStyle(document.documentElement);
+        ACCENT_COLOR = style.getPropertyValue('--accent').trim();
+        ACCENT_DIM_COLOR = style.getPropertyValue('--accent-dim').trim();
+        ACCENT_FOCUS_COLOR = style.getPropertyValue('--accent-focus').trim();
+        BG_COLOR = style.getPropertyValue('--bg').trim();
+        TEXT_COLOR = style.getPropertyValue('--text').trim();
+        SUBTITLE_COLOR = style.getPropertyValue('--subtitle-color').trim();
+        ERROR_COLOR = style.getPropertyValue('--error').trim();
+    }
+    
+    /** Gestisce il cambio di tema. */
+    const toggleBtn = document.getElementById('toggle');
+    let cyberpunkMode = false;
+    
+    function setMode(isCyberpunk) {
+        cyberpunkMode = isCyberpunk;
+        document.body.classList.toggle('cyberpunk-mode', cyberpunkMode);
+        // Testo del pulsante invertito per mostrare lo stato ATTUALE
+        toggleBtn.textContent = cyberpunkMode ? 'Cyberpunk Mode' : 'Matrix Mode'; 
+    }
+
+    function toggleTheme() {
+        setMode(!cyberpunkMode);
+        updateColors(); 
+        // Se i grafici esistono, riesegui la simulazione (versione rapida)
+        if (lineChart) {
+            handleRunSimulation(true); 
+        }
+    }
+    
+    /** Simula un singolo trial di Bernoulli. */
+    function simulateBernoulliTrial(p) {
+      return Math.random() < p ? 1 : 0;
+    }
+
+    /** Esegue una singola traiettoria della frequenza relativa con campionamento. */
+    function runSingleTrajectory(N, p) {
+      let successes = 0;
+      const sampledFrequencies = [];
+      const sampleInterval = Math.ceil(N / MAX_CHART_POINTS);
+      
+      for (let n = 1; n <= N; n++) {
+        successes += simulateBernoulliTrial(p);
+        
+        // Campionamento
+        if (n <= 100 || n % sampleInterval === 0 || n === N) {
+             const currentFreq = successes / n;
+             if (sampledFrequencies.length === 0 || sampledFrequencies[sampledFrequencies.length - 1].x !== n) {
+                sampledFrequencies.push({ x: n, y: currentFreq });
+             }
+        }
+      }
+      return { sampledFrequencies, finalFrequency: successes / N };
+    }
+
+    /** Esegue M traiettorie LLN. */
+    function runLLNSimulation(N, p, M) {
+      const sampledTrajectories = [];
+      const finalFrequencies = [];
+
+      for (let m = 0; m < M; m++) {
+        const result = runSingleTrajectory(N, p);
+        sampledTrajectories.push(result.sampledFrequencies);
+        finalFrequencies.push(result.finalFrequency); 
+      }
+
+      return { trajectories: sampledTrajectories, finalFrequencies };
+    }
+    
+    /** NUOVO: Aggiorna il box delle statistiche. */
+    function updateStatistics(finalFrequencies, p) {
+        const M = finalFrequencies.length;
+        if (M === 0) return;
+        
+        // 1. Calcola la Media
+        const sum = finalFrequencies.reduce((acc, val) => acc + val, 0);
+        const mean = sum / M;
+        
+        // 2. Calcola la Deviazione Standard
+        const sqDiffs = finalFrequencies.map(val => (val - mean) ** 2);
+        const variance = sqDiffs.reduce((acc, val) => acc + val, 0) / M;
+        const stdDev = Math.sqrt(variance);
+        
+        // 3. Calcola l'Errore Medio
+        const absErrors = finalFrequencies.map(val => Math.abs(val - p));
+        const meanError = absErrors.reduce((acc, val) => acc + val, 0) / M;
+        
+        // 4. Aggiorna il DOM
+        document.getElementById('statMean').textContent = mean.toFixed(5);
+        document.getElementById('statStdDev').textContent = stdDev.toFixed(5);
+        document.getElementById('statError').textContent = meanError.toFixed(5);
+        
+        document.getElementById('statsBox').style.display = 'flex';
+    }
+
+    
+    /** Aggiorna i due grafici con i nuovi dati di simulazione. */
+    function updateCharts(data, p, N) {
+      const { trajectories, finalFrequencies } = data;
+      const M = trajectories.length;
+
+      currentSimulationData = data; // Salva i dati per il cambio tema
+
+      // 1. Grafico a Linee (Traiettorie f(n))
+      const lineDatasets = trajectories.map((trajectory, index) => {
+        const isVisible = index < VISIBLE_TRAJECTORIES;
+        const color = isVisible ? TRAJECTORY_COLORS[index % TRAJECTORY_COLORS.length] : ACCENT_DIM_COLOR;
+        return {
+          label: `Trajectory ${index + 1}`,
+          data: trajectory, 
+          borderColor: color,
+          borderWidth: isVisible ? 1.5 : 1,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.1, 
+          hidden: !isVisible, // Nasconde le traiettorie extra
+          backgroundColor: color,
+          showLine: true,
+          parsing: false, 
+        };
+      });
+      
+      if (lineChart) { lineChart.destroy(); }
+
+      lineChart = new Chart(document.getElementById('llnLineChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          datasets: lineDatasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 0 }, 
+          plugins: {
+            title: {
+              display: true,
+              // Rimossi $
+              text: `Relative Frequency Trajectories f(n) (M=${M}, Showing ${Math.min(M, VISIBLE_TRAJECTORIES)})`,
+              color: ACCENT_COLOR,
+              font: { size: 16, family: "'Cascadia Code', monospace" }
+            },
+            legend: { display: false }, 
+            tooltip: {
+                enabled: false // Disabilita per performance
+            },
+            annotation: {
+                annotations: {
+                    probLine: {
+                        type: 'line',
+                        scaleID: 'y',
+                        value: p,
+                        borderColor: ACCENT_COLOR, // Reso più visibile
+                        borderWidth: 3,
+                        borderDash: [8, 4],
+                        label: {
+                            display: true,
+                            // Rimossi $
+                            content: `P = ${p}`,
+                            position: 'start',
+                            backgroundColor: BG_COLOR,
+                            color: ACCENT_COLOR,
+                            font: { size: 12, weight: 'bold', family: "'Cascadia Code', monospace" }
+                        }
+                    }
+                }
+            }
+          },
+          scales: {
+            x: {
+              type: 'logarithmic',
+              title: {
+                display: true,
+                // Rimossi $
+                text: `Number of Trials (n) [Log Scale] - Max ${N}`,
+                color: SUBTITLE_COLOR,
+                font: { family: "'Cascadia Code', monospace" }
+              },
+              min: 1,
+              max: N,
+              ticks: { color: TEXT_COLOR, font: { family: "'Cascadia Code', monospace" }, callback: (value) => value.toLocaleString('en-US') },
+              grid: { color: ACCENT_DIM_COLOR, borderWidth: 1 }
+            },
+            y: {
+              title: {
+                display: true,
+                // Rimossi $
+                text: 'Relative Frequency f(n)',
+                color: SUBTITLE_COLOR,
+                font: { family: "'Cascadia Code', monospace" }
+              },
+              min: 0,
+              max: 1,
+              ticks: { color: TEXT_COLOR, font: { family: "'Cascadia Code', monospace" } },
+              grid: { color: ACCENT_DIM_COLOR, borderWidth: 1 }
+            }
+          }
+        }
+      });
+      
+      // 2. Grafico Istogramma (Distribuzione di f(N)) - MIGLIORATO CON BIN DINAMICI
+      if (histogramChart) { histogramChart.destroy(); }
+      if (finalFrequencies.length === 0) return;
+
+      const BIN_COUNT = 20; 
+      const minFreq = Math.min(...finalFrequencies);
+      const maxFreq = Math.max(...finalFrequencies);
+      
+      // Aggiungi un piccolo buffer per evitare che i valori finiscano sul bordo
+      const buffer = (maxFreq - minFreq) * 0.05 || 0.01;
+      const rangeMin = Math.max(0, minFreq - buffer);
+      const rangeMax = Math.min(1, maxFreq + buffer);
+      
+      const binSize = (rangeMax - rangeMin) / BIN_COUNT;
+      const histogramData = Array(BIN_COUNT).fill(0);
+      const histogramLabels = [];
+      
+      let pBinIndex = -1;
+
+      for (let i = 0; i < BIN_COUNT; i++) {
+          const lower = rangeMin + (i * binSize);
+          const upper = lower + binSize;
+          histogramLabels.push(`${lower.toFixed(4)}-${upper.toFixed(4)}`);
+          
+          if(p >= lower && p < upper) {
+              pBinIndex = i;
+          }
+      }
+
+      finalFrequencies.forEach(freq => {
+        let binIndex = Math.floor((freq - rangeMin) / binSize);
+        if (binIndex >= BIN_COUNT) binIndex = BIN_COUNT - 1; 
+        if (binIndex < 0) binIndex = 0;
+        histogramData[binIndex]++;
+      });
+      
+      // Colori barre: evidenzia il bin che contiene P
+      const barColors = Array(BIN_COUNT).fill(ACCENT_FOCUS_COLOR); 
+      if (pBinIndex !== -1) {
+          barColors[pBinIndex] = ACCENT_COLOR;
+      }
+
+      histogramChart = new Chart(document.getElementById('llnHistogram').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: histogramLabels,
+          datasets: [{
+            // Rimossi $
+            label: `Empirical Distribution of f(N=${N})`,
+            data: histogramData,
+            backgroundColor: barColors,
+            borderColor: ACCENT_COLOR,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y', 
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 0 },
+          plugins: {
+            title: {
+              display: true,
+              // Rimossi $
+              text: 'Distribution of f(N) (Zoomed)',
+              color: ACCENT_COLOR,
+              font: { size: 14, family: "'Cascadia Code', monospace" }
+            },
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    title: (context) => `Freq. Range: ${context[0].label}`,
+                    label: (context) => `Count: ${context.formattedValue}`
+                }
+            },
+            annotation: {
+                annotations: {
+                    line1: {
+                        type: 'line',
+                        scaleID: 'y',
+                        value: pBinIndex !== -1 ? histogramLabels[pBinIndex] : null,
+                        display: pBinIndex !== -1, // Mostra solo se P è nel range
+                        borderColor: SUBTITLE_COLOR,
+                        borderWidth: 2,
+                        label: {
+                            display: true,
+                            // Rimossi $
+                            content: `P=${p}`,
+                            position: 'end',
+                            backgroundColor: BG_COLOR,
+                            color: SUBTITLE_COLOR,
+                            font: { size: 12, family: "'Cascadia Code', monospace" }
+                        }
+                    }
+                }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Count (M)',
+                color: SUBTITLE_COLOR,
+                font: { family: "'Cascadia Code', monospace" }
+              },
+              ticks: { color: TEXT_COLOR, precision: 0, font: { family: "'Cascadia Code', monospace" } },
+              grid: { color: ACCENT_DIM_COLOR }
+            },
+            y: {
+              ticks: { color: TEXT_COLOR, font: { size: 8, family: "'Cascadia Code', monospace" } },
+              grid: { display: false } // Rimuove griglia y per pulizia
+            }
+          }
+        }
+      });
+    }
+
+    /** Gestisce il click sul pulsante di simulazione. */
+    function handleRunSimulation(isThemeSwitch = false) {
+      const N_input = document.getElementById('maxTrials');
+      const M_input = document.getElementById('numTrajectories');
+      const P_input = document.getElementById('probabilityP');
+      const runBtn = document.getElementById('runSimulationBtn');
+      const loader = document.getElementById('coin-loader-area');
+      const statsBox = document.getElementById('statsBox');
+      
+      const N = parseInt(N_input.value);
+      const M = parseInt(M_input.value);
+      const p = parseFloat(P_input.value);
+      const statusElement = document.getElementById('status-message');
+
+      // 1. Gestione del cambio tema: usa i dati vecchi, aggiorna solo i grafici
+      if (isThemeSwitch && lineChart && currentSimulationData.trajectories.length > 0) {
+          updateCharts(currentSimulationData, p, N);
+          // Aggiorna anche le statistiche (non serve ricalcolare, solo DOM)
+          updateStatistics(currentSimulationData.finalFrequencies, p);
+          return;
+      }
+
+      statusElement.textContent = ''; 
+      statsBox.style.display = 'none'; // Nasconde vecchie statistiche
+
+      // 2. Validazione Input
+      if (isNaN(N) || N < 100 || N > 100000) {
+        statusElement.textContent = '// Error: N (Total Trials) must be between 100 and 100000.';
+        statusElement.style.color = ERROR_COLOR;
+        return;
+      }
+      if (isNaN(M) || M < 1 || M > 500) {
+        statusElement.textContent = '// Error: M (Trajectories) must be between 1 and 500.';
+        statusElement.style.color = ERROR_COLOR;
+        return;
+      }
+      if (isNaN(p) || p <= 0 || p >= 1) {
+        statusElement.textContent = '// Error: P (Probability) must be between 0.01 and 0.99.';
+        statusElement.style.color = ERROR_COLOR;
+        return;
+      }
+      
+      // 3. Avvio Caricamento e Animazione (Moneta)
+      runBtn.disabled = true;
+      loader.classList.add('active');
+      statusElement.style.color = SUBTITLE_COLOR;
+      statusElement.textContent = `// Executing M=${M}, N=${N}. Simulating trials...`;
+
+      // 4. Esecuzione (posticipata per far partire l'animazione)
+      setTimeout(() => {
+        try {
+          const simulationData = runLLNSimulation(N, p, M);
+          updateCharts(simulationData, p, N); 
+          updateStatistics(simulationData.finalFrequencies, p); // NUOVO
+          
+          // Rimossi $
+          statusElement.textContent = `// Simulation complete. f(n) converged towards P=${p}.`;
+          statusElement.style.color = ACCENT_COLOR;
+        } catch (error) {
+          console.error("LLN simulation error:", error);
+          statusElement.textContent = `// Simulation error: ${error.message}`;
+          statusElement.style.color = ERROR_COLOR;
+        } finally {
+          // 5. Fine Caricamento
+          loader.classList.remove('active');
+          runBtn.disabled = false;
+        }
+      }, 100); 
+    }
+
+    /** Inizializzazione. */
+    function setup() {
+      // Listener per il pulsante Esegui
+      document.getElementById('runSimulationBtn').addEventListener('click', () => handleRunSimulation(false));
+      
+      // Listener per il toggle del tema
+      document.getElementById('toggle').addEventListener('click', toggleTheme);
+      
+      // Listener per il pulsante Home
+      document.getElementById('backHome').addEventListener('click',()=>{
+        const base=window.location.pathname.replace(/\/[^\/]*$/,'/');
+        const homePath=new URL('./index.html',window.location.origin+base).href;
+        document.body.style.opacity='0';
+        setTimeout(()=>window.location.href=homePath,350);
+      });
+
+      updateColors(); // Inizializza i colori
+      
+      // Esegue una simulazione iniziale all'avvio
+      handleRunSimulation(false);
+    }
+
+    // Avvia l'applicazione quando la finestra è completamente caricata
+    window.onload = setup;
+  </script>
+
+</body>
+</html>
+
+
+
+
