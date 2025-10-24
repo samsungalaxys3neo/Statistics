@@ -300,6 +300,7 @@ body::after{
         <button class="hw-btn" id="openHW3" data-url="./homework3.html">&gt; open Homework_3</button>
       </div>
     </section>
+
   <section class="hw-box" style="margin-top:2.2rem">
       <div class="sep">----------------------------------------</div>
       <strong class="hw-title">Homework_4</strong>
@@ -403,6 +404,16 @@ document.getElementById('openHW3').addEventListener('click',e=>{
   const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
   const fullPath=new URL(url, window.location.origin + base).href;
   showLog(['> Accessing Homework_3...','> File verified.','> Loading document...'],()=>{
+    document.body.style.transition='opacity .4s ease';
+    document.body.style.opacity='0';
+    setTimeout(()=>window.location.href=fullPath,400);
+  });
+});
+document.getElementById('openHW4').addEventListener('click',e=>{
+  const url=e.currentTarget.dataset.url;
+  const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
+  const fullPath=new URL(url, window.location.origin + base).href;
+  showLog(['> Accessing Homework_4...','> File verified.','> Loading document...'],()=>{
     document.body.style.transition='opacity .4s ease';
     document.body.style.opacity='0';
     setTimeout(()=>window.location.href=fullPath,400);
