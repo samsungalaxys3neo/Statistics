@@ -312,6 +312,28 @@ body::after{
       </div>
     </section>
 
+  <section class="hw-box" style="margin-top:2.2rem">
+      <div class="sep">----------------------------------------</div>
+      <strong class="hw-title">Homework_5</strong>
+      <div class="hw-date">[06.11.25]</div>
+      <div class="hw-sub">Descriptive Statistics: Measures of Location and Dispersion</div>
+      <div class="sep" style="margin-top:.6rem">----------------------------------------</div>
+      <div class="hw-click">
+        <button class="hw-btn" id="openHW5" data-url="./homework5.html">&gt; open Homework_5</button>
+      </div>
+    </section>
+
+  <section class="hw-box" style="margin-top:2.2rem">
+      <div class="sep">----------------------------------------</div>
+      <strong class="hw-title">Homework_6</strong>
+      <div class="hw-date">[06.11.25]</div>
+      <div class="hw-sub">Incremental Algorithms for Mean and Variance</div>
+      <div class="sep" style="margin-top:.6rem">----------------------------------------</div>
+      <div class="hw-click">
+        <button class="hw-btn" id="openHW6" data-url="./homework6.html">&gt; open Homework_6</button>
+      </div>
+    </section>    
+
 </main>
 <div id="term-log"></div><div id="idle"></div>
 
@@ -414,6 +436,26 @@ document.getElementById('openHW4').addEventListener('click',e=>{
   const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
   const fullPath=new URL(url, window.location.origin + base).href;
   showLog(['> Accessing Homework_4...','> File verified.','> Loading document...'],()=>{
+    document.body.style.transition='opacity .4s ease';
+    document.body.style.opacity='0';
+    setTimeout(()=>window.location.href=fullPath,400);
+  });
+});
+document.getElementById('openHW5').addEventListener('click',e=>{
+  const url=e.currentTarget.dataset.url;
+  const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
+  const fullPath=new URL(url, window.location.origin + base).href;
+  showLog(['> Accessing Homework_5...','> File verified.','> Loading document...'],()=>{
+    document.body.style.transition='opacity .4s ease';
+    document.body.style.opacity='0';
+    setTimeout(()=>window.location.href=fullPath,400);
+  });
+});
+document.getElementById('openHW6').addEventListener('click',e=>{
+  const url=e.currentTarget.dataset.url;
+  const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
+  const fullPath=new URL(url, window.location.origin + base).href;
+  showLog(['> Accessing Homework_6...','> File verified.','> Loading document...'],()=>{
     document.body.style.transition='opacity .4s ease';
     document.body.style.opacity='0';
     setTimeout(()=>window.location.href=fullPath,400);
