@@ -333,6 +333,16 @@ body::after{
         <button class="hw-btn" id="openHW6" data-url="./homework6.html">&gt; open Homework_6</button>
       </div>
     </section>    
+  <section class="hw-box" style="margin-top:2.2rem">
+      <div class="sep">----------------------------------------</div>
+      <strong class="hw-title">Homework_6</strong>
+      <div class="hw-date">[06.11.25]</div>
+      <div class="hw-sub">Security Random Walk</div>
+      <div class="sep" style="margin-top:.6rem">----------------------------------------</div>
+      <div class="hw-click">
+        <button class="hw-btn" id="openHW7" data-url="./homework7.html">&gt; open Homework_7</button>
+      </div>
+    </section>  
 
 </main>
 <div id="term-log"></div><div id="idle"></div>
@@ -456,6 +466,16 @@ document.getElementById('openHW6').addEventListener('click',e=>{
   const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
   const fullPath=new URL(url, window.location.origin + base).href;
   showLog(['> Accessing Homework_6...','> File verified.','> Loading document...'],()=>{
+    document.body.style.transition='opacity .4s ease';
+    document.body.style.opacity='0';
+    setTimeout(()=>window.location.href=fullPath,400);
+  });
+});
+document.getElementById('openHW7').addEventListener('click',e=>{
+  const url=e.currentTarget.dataset.url;
+  const base=window.location.pathname.replace(/\/[^\/]*$/, '/');
+  const fullPath=new URL(url, window.location.origin + base).href;
+  showLog(['> Accessing Homework_7...','> File verified.','> Loading document...'],()=>{
     document.body.style.transition='opacity .4s ease';
     document.body.style.opacity='0';
     setTimeout(()=>window.location.href=fullPath,400);

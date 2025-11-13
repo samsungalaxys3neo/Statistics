@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework_7 | Security Random Walks</title>
+  
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- MathJax Configuration -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <style>
+    :root {
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(182,255,182,.25);
+      --accent-2: #6e6eff; /* Added secondary accent for HW1 charts */
+      --glow: #b6ffb6;
+      --text: #f4fff7;
+      --subtitle: #8aff8a;
+      --code-bg: #171717;
+      --container-bg: rgba(0,0,0,0.85);
+      --success: #00ff9d;
+      --danger: #ff4757;
+    }
+    
+    body.cyberpunk-mode {
+      --bg: #000;
+      --accent: #ff00cc;
+      --accent-dim: rgba(255,0,204,.25);
+      --accent-2: #00f0ff;
+      --glow: #ff00cc;
+      --text: #eaffef;
+      --subtitle: #ff88ff;
+      --code-bg: #1a001a;
+      --container-bg: rgba(10, 0, 20, 0.85);
+    }
+    
+    *{margin:0;padding:0;box-sizing:border-box}
+    
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Cascadia Code', monospace;
+      padding:2rem;
+      transition:background .6s ease, color .6s ease;
+      overflow-x: hidden;
+    }
+    
+    /* MathJax styling to match theme */
+    mjx-container { color: var(--text); transition: color .6s ease; }
+    
+    #toggle{position:fixed;top:16px;right:16px;padding:.55rem 1rem;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(145deg,var(--accent),var(--glow));color:#000;font-weight:bold;box-shadow:0 0 12px var(--glow),inset 0 0 5px rgba(255,255,255,.2); z-index: 100;}
+    #toggle:hover{transform:scale(1.05);box-shadow:0 0 18px var(--glow);}
+    
+    .container{max-width:1000px;margin:6rem auto;padding:2rem 2.5rem;background:var(--container-bg);border:1px solid var(--accent-dim);border-radius:12px;box-shadow:0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05); transition: background .6s ease, border .6s ease;}
+    
+    h1,h2,h3,h4{color:var(--accent);text-shadow:0 0 8px var(--glow);text-align:center; transition: color .6s ease, text-shadow .6s ease;}
+    h1{font-size:2.3rem;margin-bottom:.4rem;}
+    h2{font-size:1.1rem;margin-bottom:2.5rem;opacity:.9; line-height: 1.6; padding: 0 1rem;}
+    h3{margin-top:2.5rem;margin-bottom:1.2rem;color:var(--subtitle); font-size: 1.4rem; border-bottom: 1px solid var(--accent-dim); padding-bottom: 0.5rem; text-align: left; transition: color .6s ease, border-bottom .6s ease;}
+    h4{margin-top:1.5rem;margin-bottom:.5rem;font-size:1.1rem;color:var(--subtitle); text-align: left;}
+    
+    p{margin-bottom:1rem;line-height:1.7; opacity: 0.9;}
+    ul { margin-left: 2rem; margin-bottom: 1rem; line-height: 1.7; }
+    li { margin-bottom: 0.5rem; }
+    strong { color: var(--accent); font-weight: bold; }
+
+    /* Formula Box style from HW6 */
+    .formula-box{background:var(--code-bg);color:var(--text);border:1px solid var(--accent-dim);border-radius:10px;padding: 0.5rem 1.2rem;font-family:'Cascadia Code',monospace;overflow-x:auto;margin-top:1rem;margin-bottom:1.5rem;font-size:1.1rem;text-align:center;line-height:1.8; box-shadow: inset 0 0 8px rgba(0,0,0,0.3); transition: background .6s ease, border .6s ease;}
+
+    /* Controls specific to HW1 */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--code-bg);
+      border: 1px solid var(--accent-dim);
+      border-radius: 12px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    }
+    .control-group { display: flex; flex-direction: column; }
+    label { font-size: 0.9rem; color: var(--accent); margin-bottom: 0.5rem; text-shadow: 0 0 5px var(--accent-dim); }
+    input[type="number"], input[type="range"] {
+      background: var(--bg);
+      border: 1px solid var(--accent-dim);
+      color: var(--text);
+      padding: 0.7rem;
+      border-radius: 8px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="number"]:focus, input[type="range"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-dim);
+    }
+
+    /* Buttons & Canvas from HW6 */
+    .btn{
+      display:block;
+      margin:1.5rem auto 1rem auto;
+      background:transparent;
+      border:1px solid var(--accent-dim);
+      color:var(--accent);
+      padding:.7rem 1.2rem;
+      border-radius:8px;
+      cursor:pointer;
+      font-size: 1rem;
+      font-family: 'Cascadia Code', monospace;
+      text-shadow:0 0 8px var(--glow);
+      transition:.25s;
+      box-shadow: 0 0 10px var(--accent-dim);
+      width: 100%; max-width: 300px;
+    }
+    .btn:hover{background:var(--accent);color:#000; box-shadow: 0 0 20px var(--glow);}
+    
+    canvas{
+      display:block;
+      margin:2rem auto;
+      background:rgba(0,0,0,0.6);
+      border-radius:10px;
+      border: 1px solid var(--accent-dim);
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+      width: 100% !important;
+      height: 400px !important;
+    }
+
+    /* Stats Grid for HW1 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .stat-card {
+      background: var(--code-bg);
+      padding: 1.5rem;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--accent-dim);
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+    .stat-val { font-size: 1.8rem; color: var(--accent); margin-bottom: 0.5rem; text-shadow: 0 0 10px var(--accent-dim); }
+    .stat-label { font-size: 0.9rem; opacity: 0.8; color: var(--text); }
+
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .container { margin: 4rem auto; padding: 1.5rem; width: 95%; }
+      h1 { font-size: 1.8rem; }
+      .controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<button id="toggle">Cyberpunk Mode</button>
+
+<div class="container">
+  <h1>Homework_1</h1>
+  <h2>Random Walks, Security Trajectories & Binomial Convergence</h2>
+
+  <!-- SECTION 1: THEORY -->
+  <h3>&gt; Section 1: Theoretical Background</h3>
+  <p>
+    We are modeling a server's security status over $n$ weeks. In each week $i$, the server is either:
+  </p>
+  <ul>
+    <li><strong>Breached</strong> (with probability $p$): Score $X_i = -1$</li>
+    <li><strong>Secure</strong> (with probability $1-p$): Score $X_i = +1$</li>
+  </ul>
+  <p>
+    The cumulative security score at week $n$ is the sum of these independent random variables: 
+    $$ S_n = \sum_{i=1}^{n} X_i $$
+    This is a classic <strong>1D Random Walk</strong>.
+  </p>
+  <div class="formula-box">
+    $$ P(S_n = s) = \binom{n}{k} (1-p)^k p^{n-k}, \quad \text{where } k = \frac{s+n}{2} $$
+  </div>
+  <p>
+    Since the number of secure weeks $k$ follows a Binomial Distribution, the final score $S_n$ also follows a shifted Binomial distribution.
+  </p>
+
+  <!-- SECTION 2: CONTROLS -->
+  <h3>&gt; Section 2: Simulation Parameters</h3>
+  <div class="controls">
+    <div class="control-group">
+      <label for="n_weeks">N (Weeks/Steps)</label>
+      <input type="number" id="n_weeks" value="50" min="1" max="1000">
+    </div>
+    <div class="control-group">
+      <label for="m_attackers">M (Attackers/Trajectories)</label>
+      <input type="number" id="m_attackers" value="1000" min="1" max="100000">
+    </div>
+    <div class="control-group">
+      <label for="p_breach">P (Probability of Breach): <span id="p_val" style="color:var(--accent)">0.5</span></label>
+      <input type="range" id="p_breach" min="0" max="1" step="0.01" value="0.5" 
+             oninput="document.getElementById('p_val').innerText = this.value">
+    </div>
+  </div>
+  <button class="btn" onclick="runSimulation()">INITIATE_SIMULATION()</button>
+
+  <!-- SECTION 3: TRAJECTORIES -->
+  <h3>&gt; Section 3: Trajectory Analysis</h3>
+  <p>The chart below visualizes the random paths of the first 50 servers. While individual paths are unpredictable, they tend to cluster around the expected drift.</p>
+  <canvas id="trajectoryChart"></canvas>
+
+  <!-- SECTION 4: DISTRIBUTION -->
+  <h3>&gt; Section 4: Final Score Distribution</h3>
+  <p>
+    Comparing empirical results ($M$ simulations) vs theoretical Binomial probability. As $M \to \infty$, the bars perfectly align with the line due to the Law of Large Numbers.
+  </p>
+  <canvas id="distributionChart"></canvas>
+  
+  <div class="stats-grid" id="statsOutput">
+    <!-- Stats injected by JS -->
+  </div>
+
+</div>
+
+<script>
+// --- THEME MANAGEMENT ---
+const toggleBtn = document.getElementById('toggle');
+let cyberpunkMode = false;
+toggleBtn.onclick = () => {
+  cyberpunkMode = !cyberpunkMode;
+  document.body.classList.toggle('cyberpunk-mode', cyberpunkMode);
+  toggleBtn.textContent = cyberpunkMode ? 'Matrix Mode' : 'Cyberpunk Mode';
+  // Update charts to match new theme colors
+  if (trajChartInstance) updateChartTheme(trajChartInstance);
+  if (distChartInstance) updateChartTheme(distChartInstance);
+};
+
+// --- UTILS & MATH ---
+const getThemeColor = (varName) => getComputedStyle(document.body).getPropertyValue(varName).trim();
+
+const factorialCache = {0: 1, 1: 1};
+function factorial(n) {
+    if (factorialCache[n] !== undefined) return factorialCache[n];
+    let res = 1;
+    for (let i = 2; i <= n; i++) res *= i;
+    factorialCache[n] = res;
+    return res;
+}
+
+function combinations(n, k) {
+    if (k < 0 || k > n) return 0;
+    if (k === 0 || k === n) return 1;
+    if (k > n / 2) k = n - k;
+    let res = 1;
+    for (let i = 1; i <= k; i++) res = res * (n - i + 1) / i;
+    return res;
+}
+
+function getTheoreticalProb(n, pBreach, score) {
+    const pSecure = 1.0 - pBreach;
+    if ((score + n) % 2 !== 0) return 0;
+    const k = (score + n) / 2;
+    if (k < 0 || k > n) return 0;
+    return combinations(n, k) * Math.pow(pSecure, k) * Math.pow(pBreach, n - k);
+}
+
+// --- CHARTS ---
+Chart.defaults.font.family = "'Cascadia Code', monospace";
+let trajChartInstance = null;
+let distChartInstance = null;
+
+function updateChartTheme(chart) {
+    const accent = getThemeColor('--accent');
+    const accentDim = getThemeColor('--accent-dim');
+    const text = getThemeColor('--text');
+
+    chart.options.scales.x.grid.color = accentDim;
+    chart.options.scales.y.grid.color = accentDim;
+    chart.options.scales.x.ticks.color = text;
+    chart.options.scales.y.ticks.color = text;
+    
+    if (chart.config.type === 'line' && chart.data.datasets.length > 2) {
+        // Trajectory chart specific updates
+        chart.data.datasets.forEach(d => d.borderColor = accentDim);
+        chart.data.datasets[0].borderColor = getThemeColor('--success'); // Highlight first one
+    } else if (chart.config.type === 'bar') {
+        // Distribution chart specific updates
+        chart.data.datasets[0].borderColor = getThemeColor('--success'); // Theoretical line
+        chart.data.datasets[0].backgroundColor = getThemeColor('--success');
+        chart.data.datasets[1].backgroundColor = accent; // Empirical bars
+    }
+    chart.update('none'); // Update without animation for theme switch
+}
+
+// --- SIMULATION CORE ---
+function runSimulation() {
+    const N = parseInt(document.getElementById('n_weeks').value);
+    const M = parseInt(document.getElementById('m_attackers').value);
+    const P = parseFloat(document.getElementById('p_breach').value);
+
+    const maxVisualTraj = 50;
+    let visualTrajectories = []; 
+    let finalScores = new Int32Array(M);
+    let scoreFrequencies = {};
+
+    for (let s = -N; s <= N; s += 2) scoreFrequencies[s] = 0;
+
+    for (let m = 0; m < M; m++) {
+        let currentScore = 0;
+        let trajectory = (m < maxVisualTraj) ? new Int32Array(N + 1) : null;
+        if (trajectory) trajectory[0] = 0;
+
+        for (let i = 1; i <= N; i++) {
+            if (Math.random() < P) currentScore--; else currentScore++;
+            if (trajectory) trajectory[i] = currentScore;
+        }
+        finalScores[m] = currentScore;
+        if (scoreFrequencies[currentScore] !== undefined) scoreFrequencies[currentScore]++;
+        if (m < maxVisualTraj) visualTrajectories.push(trajectory);
+    }
+
+    updateTrajectoryChart(N, visualTrajectories);
+    updateDistributionChart(N, M, P, scoreFrequencies);
+    updateStats(finalScores, N, M);
+}
+
+function updateTrajectoryChart(N, trajectories) {
+    const ctx = document.getElementById('trajectoryChart').getContext('2d');
+    const labels = Array.from({length: N + 1}, (_, i) => i);
+    const accentDim = getThemeColor('--accent-dim');
+    const success = getThemeColor('--success');
+
+    const datasets = trajectories.map((traj, i) => ({
+        label: `Run ${i}`,
+        data: Array.from(traj),
+        borderColor: i === 0 ? success : accentDim, // Highlight first run
+        borderWidth: i === 0 ? 2 : 1,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false
+    }));
+
+    if (trajChartInstance) trajChartInstance.destroy();
+    trajChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: 'Week (t)', color: getThemeColor('--accent') } },
+                y: { title: { display: true, text: 'Score (S_t)', color: getThemeColor('--accent') }, suggestedMin: -Math.sqrt(N)*2, suggestedMax: Math.sqrt(N)*2 }
+            }
+        }
+    });
+    updateChartTheme(trajChartInstance);
+}
+
+function updateDistributionChart(N, M, P, frequencies) {
+    const ctx = document.getElementById('distributionChart').getContext('2d');
+    let labels = [], empiricalData = [], theoreticalData = [];
+
+    for (let s = -N; s <= N; s++) {
+        if ((s + N) % 2 === 0) {
+            labels.push(s);
+            empiricalData.push(frequencies[s] || 0);
+            theoreticalData.push(getTheoreticalProb(N, P, s) * M);
+        }
+    }
+
+    if (distChartInstance) distChartInstance.destroy();
+    distChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'line',
+                    label: 'Theoretical',
+                    data: theoreticalData,
+                    borderColor: getThemeColor('--success'),
+                    backgroundColor: getThemeColor('--success'),
+                    borderWidth: 2, pointRadius: 0, tension: 0.4
+                },
+                {
+                    type: 'bar',
+                    label: 'Empirical',
+                    data: empiricalData,
+                    backgroundColor: getThemeColor('--accent'),
+                    barPercentage: 1.0, categoryPercentage: 1.0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: 'Final Score', color: getThemeColor('--accent') } },
+                y: { title: { display: true, text: 'Count', color: getThemeColor('--accent') }, beginAtZero: true }
+            }
+        }
+    });
+    updateChartTheme(distChartInstance);
+}
+
+function updateStats(finalScores, N, M) {
+    let sum = 0, sumSq = 0;
+    for(let i=0; i<M; i++) { sum += finalScores[i]; sumSq += finalScores[i]**2; }
+    const mean = sum / M;
+    const stdDev = Math.sqrt((sumSq / M) - (mean * mean));
+
+    // TypeWriter effect for stats just for fun and consistency with HW6 vibe
+    const statsHTML = `
+        <div class="stat-card"><div class="stat-val">${mean.toFixed(2)}</div><div class="stat-label">Empirical Mean</div></div>
+        <div class="stat-card"><div class="stat-val">${stdDev.toFixed(2)}</div><div class="stat-label">Empirical Std Dev</div></div>
+        <div class="stat-card"><div class="stat-val">${N}</div><div class="stat-label">Max Possible |Score|</div></div>
+    `;
+    document.getElementById('statsOutput').innerHTML = statsHTML;
+}
+
+// --- RETURN HOME BTN ---
+const returnBtn = document.createElement('button');
+returnBtn.className = 'btn';
+returnBtn.id = 'backHome';
+returnBtn.textContent = '> return Home';
+returnBtn.style.marginTop = '3rem';
+document.querySelector('.container').appendChild(returnBtn);
+returnBtn.addEventListener('click', () => window.location.href = './index.html');
+
+// Initial Run
+runSimulation();
+</script>
+</body>
+</html>
