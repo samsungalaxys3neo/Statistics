@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework_8 | Stochastic & Combinatorial Analogies</title>
+  
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  
+  <!-- MathJax Configuration (Added from original HW8) -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- Style is COPIED EXACTLY from your provided template -->
+  <style>
+    :root {
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(182,255,182,.25);
+      --glow: #b6ffb6;
+      --text: #f4fff7;
+      --subtitle: #8aff8a;
+      /* Added --code-bg from your template's .sql-box */
+      --code-bg: #171717;
+    }
+    body.cyberpunk-mode {
+      --bg: #000;
+      --accent: #ff00cc;
+      --accent-dim: rgba(255,0,204,.25);
+      --glow: #ff00cc;
+      --text: #eaffef;
+      --subtitle: #ff88ff;
+      /* Added --code-bg equivalent for cyberpunk */
+      --code-bg: #1a0a1a;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Cascadia Code', monospace;
+      overflow-x:hidden;
+      padding:2rem;
+      transition:background .6s ease, color .6s ease;
+    }
+
+    #toggle{
+      position:fixed;top:16px;right:16px;z-index:10;
+      background:linear-gradient(145deg,var(--accent),var(--glow));
+      color:#000;border:none;
+      padding:.55rem 1rem;border-radius:10px;cursor:pointer;
+      font-weight:bold;box-shadow:0 0 12px var(--glow),inset 0 0 5px rgba(255,255,255,.2);
+      transition:transform .25s, box-shadow .25s;
+    }
+    #toggle:hover{transform:scale(1.05);box-shadow:0 0 18px var(--glow);}
+
+    .container{
+      max-width:900px;margin:6rem auto;padding:2rem 2.5rem;
+      background:rgba(0,0,0,0.85);
+      border:1px solid var(--accent-dim);
+      border-radius:12px;
+      box-shadow:0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);
+      transition: all .6s ease;
+    }
+    h1,h2,h3,h4{color:var(--accent);text-shadow:0 0 8px var(--glow);text-align:center; transition: color .6s ease;}
+    h1{font-size:2.3rem;margin-bottom:.4rem;}
+    h2{font-size:1.2rem;margin-bottom:1.8rem;opacity:.9;}
+    h3{margin-top:1.8rem;margin-bottom:.8rem;color:var(--subtitle); text-align: left; transition: color .6s ease;}
+    h4{margin-top:1rem;margin-bottom:.5rem;font-size:1rem;color:var(--subtitle); text-align: left; transition: color .6s ease;}
+    
+    p{margin-bottom:1rem; line-height: 1.7; opacity: 0.95;}
+    ul { margin-left: 2.5rem; margin-bottom: 1.5rem; line-height: 1.7; }
+    li { margin-bottom: 0.8rem; }
+    strong { color: var(--accent); font-weight: bold; }
+    
+    /* Using the .sql-box style from your template for our formula boxes */
+    .sql-box{
+      background:var(--code-bg);
+      color:var(--text);
+      border:1px solid var(--accent-dim);
+      border-radius:10px;
+      padding:1.5rem 2rem;
+      font-family:'Cascadia Code', monospace;
+      overflow-x:auto;
+      margin: 2rem 0;
+      text-align:center;
+      box-shadow:inset 0 0 8px rgba(0,0,0,0.15);
+      transition: all .6s ease;
+    }
+    
+    /* MathJax style fix to ensure it transitions with theme */
+    mjx-container { 
+      color: var(--text); 
+      transition: color .6s ease; 
+      margin: 1.5rem 0; 
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    .btn{
+      display:block;margin:1rem auto;background:transparent;border:1px solid var(--accent-dim);
+      color:var(--accent);padding:.5rem .9rem;border-radius:8px;cursor:pointer;text-shadow:0 0 8px var(--glow);transition:.25s;
+    }
+    .btn:hover{background:var(--accent);color:#000;}
+
+    /* Unused styles from template, kept for perfect style match */
+    table{width:100%;border-collapse:collapse;margin-top:1rem;color:var(--text);font-size:.9rem;}
+    th,td{border:1px solid var(--accent-dim);padding:.5rem;text-align:center;}
+    th{color:var(--accent);text-shadow:0 0 6px var(--glow);}
+    #outputDemo {background: rgba(0, 0, 0, 0.8);padding: 1rem;border-radius: 10px;font-family: 'Cascadia Code', monospace;font-size: 0.95rem;line-height: 1.5;color: var(--accent);box-shadow: 0 0 15px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);white-space: pre-wrap;min-height: 80px;overflow-wrap: break-word;}
+    canvas{display:block;margin:2rem auto;background:rgba(0,0,0,0.8);border-radius:10px;box-shadow:0 0 20px var(--accent-dim);width:100%;max-width:850px;height:350px;}
+    textarea{width:100%;margin:1rem 0;padding:1rem;border-radius:8px;border:1px solid var(--accent-dim);font-family:'Cascadia Code',monospace;background:#171717;color:var(--accent);height:200px;resize:none;overflow-y:auto;}
+    select{display:block;margin:1rem auto;padding:.6rem;border-radius:8px;border:1px solid var(--accent-dim);background:#171717;color:var(--accent);}
+
+    /* Responsive design (COPIED) */
+    @media (max-width: 768px) {
+      body {padding: 1rem;}
+      .container {margin: 4rem auto;padding: 1.5rem;width: 95%;}
+      h1 {font-size: 1.8rem;}
+      h2 {font-size: 1rem;margin-bottom: 1rem;}
+      h3, h4 {font-size: 0.95rem;}
+      p {font-size: 0.9rem;line-height: 1.4;}
+      textarea {height: 150px;font-size: 0.85rem;}
+      .btn {width: 100%;font-size: 0.9rem;padding: 0.6rem;}
+      table, th, td {font-size: 0.8rem;word-wrap: break-word;}
+      canvas {width: 100%;height: auto;max-width: 100%;}
+      #toggle {top: 10px;right: 10px;padding: 0.4rem 0.8rem;font-size: 0.8rem;}
+    }
+
+    /* For very small screens (COPIED) */
+    @media (max-width: 480px) {
+      h1 {font-size: 1.5rem;}
+      h2 {font-size: 0.9rem;}
+      .container {padding: 1rem;}
+      textarea {height: 130px;}
+      .btn {font-size: 0.85rem;padding: 0.5rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toggle Mode Button (COPIED) -->
+<button id="toggle">Cyberpunk Mode</button>
+
+<div class="container">
+  
+  <h1>Homework_8</h1>
+  <h2>Analogies between Stochastic Processes and Combinatorics</h2>
+
+  <h3>&gt; Preamble: Comparison between HMWK 1 and the Law of Large Numbers</h3>
+  
+  <p><strong>Homework 1</strong> simulated a <strong>1D Random Walk</strong>. Every week ($n$ total steps), a server experienced an event $X_i$ with two possible outcomes: $+1$ (secure, probability $1-p$) or $-1$ (breached, probability $p$). The final score was the sum $S_n = \sum_{i=1}^n X_i$.</p>
+  
+  <p>A "pure" simulation of the <strong>Law of Large Numbers (LLN)</strong> would observe a simpler Bernoulli process, $Y_i$, with outcomes $\{1, 0\}$ (e.g., success/failure). The LLN states that the sample mean $\bar{Y}_n = \frac{1}{n} \sum Y_i$ converges to the success probability $p$.</p>
+
+  <h3>&gt; Fundamental Similarities and Differences</h3>
+  
+  <ul>
+    <li>
+      <strong>Similarity (The Bernoulli Process):</strong> Both models are founded on <strong>i.i.d. Bernoulli trials</strong> (independent and identically distributed). HMWK 1 is a simple linear transformation of a standard Bernoulli process ($K_n$, the *number* of successes):
+      $$ S_n = (+1) \cdot K_n + (-1) \cdot (n - K_n) = 2K_n - n $$
+      Simulating $S_n$ is equivalent to simulating $K_n$. The convergence of the empirical distribution of $S_n$ to its theoretical form (which we saw in HMWK 1) is a direct manifestation of the LLN.
+    </li>
+    <li>
+      <strong>Difference (The State Space):</strong> HMWK 1 focuses on the cumulative "score" (a state space $S_n \in \{-n, -n+2, ..., n\}$), typical of Random Walks. A standard LLN simulation focuses on the "count" ($K_n \in \{0, 1, ..., n\}$). The concepts are mathematically equivalent, but the physical interpretation (a "walk" vs. a "success rate") differs.
+    </li>
+  </ul>
+
+  <h3>&gt; Mathematical Properties and Combinatorial Relations</h3>
+  
+  <p>This is where the true depth emerges. The Bernoulli process is the bridge connecting probability to combinatorics.</p>
+
+  <h4>▶ Binomial Coefficients and Pascal's Triangle</h4>
+  
+  <p>Why is the final distribution called "Binomial"? Because it's built with <strong>binomial coefficients</strong>. A binomial coefficient, $\binom{n}{k}$, counts the number of ways to choose $k$ items from a set of $n$, without replacement and without regard to order.</p>
+  
+  <p>In our HMWK 1, to get a final score $S_n$ (which is equivalent to having $k = (S_n+n)/2$ successes), there are exactly $\binom{n}{k}$ unique paths (trajectories) that lead to that result. If $p=0.5$, every path is equally likely, so the probability of a final score is $\binom{n}{k} / 2^n$.</p>
+
+  <p><strong>Pascal's Triangle</strong> is the geometric visualization of these coefficients. Each number in the triangle is the sum of the two numbers above it. This corresponds exactly to the number of paths to reach a point in a Random Walk: to arrive at step $n$, position $k$, you must have come from either $(n-1, k-1)$ or $(n-1, k)$.</p>
+
+  <!-- Re-using .sql-box class from template for the formula box -->
+  <div class="sql-box">
+    <strong>Fundamental Relation (Pascal's Rule):</strong>
+    $$ \binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k} $$
+    (Num. paths for $k$ successes in $n$ steps) = (Num. paths for $k-1$ successes in $n-1$ steps, followed by a success) + (Num. paths for $k$ successes in $n-1$ steps, followed by a failure)
+  </div>
+
+  <h4>▶ Binomial Expansion</h4>
+  
+  <p>The Binomial Theorem describes the algebraic expansion of a power of a binomial:</p>
+  $$ (x+y)^n = \sum_{k=0}^n \binom{n}{k} x^k y^{n-k} $$
+  
+  <p>The analogy is perfect. If we set $x = (1-p)$ (probability of $+1$) and $y = p$ (probability of $-1$), the expansion represents the *sum* of the probabilities of *all possible outcomes* after $n$ steps.</p>
+  
+  <ul>
+    <li>The term $\binom{n}{k} (1-p)^k p^{n-k}$ is exactly the probability of having $k$ successes and $n-k$ failures (the Binomial PMF).</li>
+    <li>The entire sum is $ \sum P(K_n=k) = ((1-p) + p)^n = 1^n = 1 $. This proves that the sum of all probabilities in our model is 1.</li>
+    <li>If $x=1, y=1$, we get $(1+1)^n = 2^n = \sum \binom{n}{k}$, which counts the total number of all possible unique paths in $n$ steps (if $p=0.5$).</li>
+  </ul>
+
+  <h4>▶ The Fibonacci Sequence (A Different Connection)</h4>
+  
+  <p>The connection with the <strong>Fibonacci Sequence</strong> ($F_n = F_{n-1} + F_{n-2}$) is less direct, but it exists via Pascal's Triangle. If you sum the numbers along the "shallow diagonals" of Pascal's Triangle, you get the Fibonacci sequence.</p>
+
+  <p>This is because $F_n$ can be expressed in terms of binomial coefficients:</p>
+  
+  <!-- Re-using .sql-box class from template for the formula box -->
+  <div class="sql-box">
+    $$ F_{n} = \sum_{k=0}^{\lfloor (n-1)/2 \rfloor} \binom{n-k-1}{k} $$
+  </div>
+  
+  <p><strong>Combinatorial Interpretation:</strong>
+  While $\binom{n}{k}$ counts paths in a $\{+1, -1\}$ Random Walk, $F_n$ counts the number of ways to "climb $n$ stairs" taking steps of either 1 or 2 stairs. It's a different kind of stochastic/combinatorial process, where the current state depends on the *two* previous states (not just one), and the choice at each step isn't a simple Bernoulli trial (it's a choice between "step 1" or "step 2").</p>
+  
+  <p>So, while not analogous to HMWK 1, $F_n$ belongs to the same family of "combinatorial counting" problems and shares a mathematical root (Pascal's Triangle) with binomial coefficients.</p>
+
+  <h3>&gt; Conclusion</h3>
+  
+  <p><strong>Homework 1</strong> was a physical simulation (a "Random Walk") of a Bernoulli process. <strong>Homework 8</strong> (this analysis) reveals that the structure of that process is governed entirely by the laws of combinatorics.</p>
+  
+  <p>The <strong>binomial coefficient</strong> $\binom{n}{k}$ is the unifying concept:
+  <ol>
+    <li>It counts the <strong>number of paths</strong> (Combinatorics, Pascal's Triangle).</li>
+    <li>It defines the <strong>probability distribution</strong> (Statistics, Binomial Distribution).</li>
+    <li>It is the coefficient in the <strong>algebraic expansion</strong> (Algebra, Binomial Theorem).</li>
+  </ol>
+  The simulation in HMWK 1 empirically demonstrated (via the LLN) the validity of these theoretical connections.
+  </p>
+  
+  <!-- The "Return Home" button will be added here by the script -->
+
+</div>
+
+<script>
+// --- PART 1: Style and Toggle Mode (COPIED) ---
+const toggleBtn = document.getElementById('toggle');
+let cyberpunkMode = false;
+function setMode(isCyberpunk) {
+  cyberpunkMode = isCyberpunk;
+  document.body.classList.toggle('cyberpunk-mode', cyberpunkMode);
+  toggleBtn.textContent = cyberpunkMode ? 'Matrix Mode' : 'Cyberpunk Mode';
+}
+setMode(false); // Initialize mode
+toggleBtn.addEventListener('click', () => setMode(!cyberpunkMode));
+
+
+// --- PART 2: Remove TypeWriter (Not needed for this page) ---
+// The original template's "runDemo" logic is not needed here.
+
+
+// --- PART 3: "Return Home" Button (COPIED) ---
+const returnBtn = document.createElement('button');
+returnBtn.className = 'btn';
+returnBtn.id = 'backHome';
+returnBtn.textContent = '> return Home';
+returnBtn.style.marginTop = '1.6rem';
+
+const container = document.querySelector('.container');
+if (container) {
+  container.appendChild(returnBtn);
+  
+  document.getElementById('backHome').addEventListener('click', () => {
+    window.location.href = './index.html'; 
+  });
+} else {
+  console.error("Container not found. Cannot add Home button.");
+}
+
+</script>
+</body>
+</html>
