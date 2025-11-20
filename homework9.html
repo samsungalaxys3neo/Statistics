@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Homework_9 | Probability Foundations</title>
+  
+  <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+  
+  <!-- MathJax Configuration -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- STYLES COPIED EXACTLY AS REQUESTED -->
+  <style>
+    :root {
+      --bg: #0a0010;
+      --accent: #b6ffb6;
+      --accent-dim: rgba(182,255,182,.25);
+      --glow: #b6ffb6;
+      --text: #f4fff7;
+      --subtitle: #8aff8a;
+      --code-bg: #171717; /* Added for formula boxes */
+    }
+    body.cyberpunk-mode {
+      --bg: #000;
+      --accent: #ff00cc;
+      --accent-dim: rgba(255,0,204,.25);
+      --glow: #ff00cc;
+      --text: #eaffef;
+      --subtitle: #ff88ff;
+      --code-bg: #1a0a1a;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Cascadia Code', monospace;
+      overflow-x:hidden;
+      padding:2rem;
+      transition:background .6s ease, color .6s ease;
+    }
+
+    #toggle{
+      position:fixed;top:16px;right:16px;z-index:10;
+      background:linear-gradient(145deg,var(--accent),var(--glow));
+      color:#000;border:none;
+      padding:.55rem 1rem;border-radius:10px;cursor:pointer;
+      font-weight:bold;box-shadow:0 0 12px var(--glow),inset 0 0 5px rgba(255,255,255,.2);
+      transition:transform .25s, box-shadow .25s;
+    }
+    #toggle:hover{transform:scale(1.05);box-shadow:0 0 18px var(--glow);}
+
+    .container{
+      max-width:900px;margin:6rem auto;padding:2rem 2.5rem;
+      background:rgba(0,0,0,0.85);
+      border:1px solid var(--accent-dim);
+      border-radius:12px;
+      box-shadow:0 0 20px var(--accent-dim), inset 0 0 10px rgba(255,255,255,0.05);
+    }
+    h1,h2,h3,h4{color:var(--accent);text-shadow:0 0 8px var(--glow);text-align:center;}
+    h1{font-size:2.3rem;margin-bottom:.4rem;}
+    h2{font-size:1.2rem;margin-bottom:1.8rem;opacity:.9;}
+    h3{margin-top:1.8rem;margin-bottom:.8rem;color:var(--subtitle);}
+    h4{margin-top:1rem;margin-bottom:.5rem;font-size:1rem;color:var(--subtitle);}
+    p{margin-bottom:1rem; line-height: 1.6; opacity: 0.95;}
+
+    /* Re-using .sql-box style for formulas/code */
+    .sql-box{
+      background:var(--code-bg);
+      color:#ffffff;
+      border-radius:10px;
+      padding:1rem 1.2rem;
+      font-family:'Cascadia Code', monospace;
+      overflow-x:auto;
+      margin-top:1rem;
+      margin-bottom:1.5rem;
+      box-shadow:inset 0 0 8px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    .sql-keyword{color:#0074d9;font-weight:bold;}
+    .sql-string{color:#b03060;}
+    .sql-number{color:#2e8b57;}
+
+    /* Comparison Table Style Adapted */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:1rem;
+      color:var(--text);
+      font-size:.9rem;
+    }
+    th,td{
+      border:1px solid var(--accent-dim);
+      padding:.8rem;
+      text-align:left;
+    }
+    th{color:var(--accent);text-shadow:0 0 6px var(--glow); text-align: center;}
+
+    .btn{
+      display:block;margin:1rem auto;background:transparent;border:1px solid var(--accent-dim);
+      color:var(--accent);padding:.5rem .9rem;border-radius:8px;cursor:pointer;text-shadow:0 0 8px var(--glow);transition:.25s;
+    }
+    .btn:hover{background:var(--accent);color:#000;}
+
+    /* MathJax override to match theme */
+    mjx-container { color: var(--text); transition: color .6s ease; margin: 1rem 0;}
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .container { margin: 4rem auto; padding: 1.5rem; width: 95%; }
+      h1 { font-size: 1.8rem; }
+      table, th, td { font-size: 0.8rem; }
+      #toggle { top: 10px; right: 10px; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Button Toggle Mode -->
+<button id="toggle">Cyberpunk Mode</button>
+
+<div class="container">
+  
+  <h1>Homework_9</h1>
+  <h2>Probability: From Philosophy to Measure Theory</h2>
+
+  <h3>&gt; Part 1: The "Problem" with Probability</h3>
+  <p>
+    Have you ever noticed how difficult it is to actually define what "probability" <em>is</em>? Before the 1930s, mathematics was stuck in a bit of a philosophical loop. Everyone had a different idea of what $P(A)$ meant, and they all had fatal flaws.
+  </p>
+
+  <h4>▶ The Classical View (The "Fair Dice" Problem)</h4>
+  <p>
+    This is the intuitive definition we learn as kids: "Number of favorable cases divided by total cases."
+    It sounds great, but it's actually circular logic. To say that a die has a $1/6$ probability for each side, you have to assume the sides are <em>equiprobable</em>. But "equiprobable" is just a fancy word for "same probability." We are defining probability by using the concept of probability! Plus, this completely breaks down if your sample space is infinite (like picking a random number on a line).
+  </p>
+
+  <h4>▶ The Frequentist View (The "Infinite Replay" Problem)</h4>
+  <p>
+    Here, probability is the limit of frequency: $N_A / N_{total}$ as $N \to \infty$.
+    This works for coins and dice, but it fails for reality. We cannot flip a coin infinite times. More importantly, we can't use this for unique events. What is the probability of "The 2028 Olympics being cancelled"? You can't run the year 2028 a million times to check the frequency.
+  </p>
+
+  <h4>▶ The Subjective (Bayesian) View</h4>
+  <p>
+    This treats probability as a "degree of belief." It's powerful, but it makes probability personal. My probability might differ from yours because we have different priors. While useful, it feels uncomfortable for mathematicians who want objective, universal truths.
+  </p>
+
+  <h3>&gt; Part 2: Kolmogorov's Resolution (The Axiomatic Approach)</h3>
+  <p>
+    Andrey Kolmogorov (1933) solved this by basically saying: <em>"I don't care what probability MEANS, I only care how it BEHAVES."</em>
+  </p>
+  <p>
+    He realized that Probability is just a specific case of <strong>Measure Theory</strong>. Just like we measure the length of a rope or the volume of water, we measure the "mass" of an event. He stripped away the philosophy and built it on three simple rules (Axioms). If your belief system or frequency count follows these rules, it's valid probability.
+  </p>
+  
+  
+
+  <p>This mapping allows us to use rigorous calculus on random events.</p>
+
+  <table>
+      <thead>
+          <tr>
+              <th>Concept</th>
+              <th>Probability Term</th>
+              <th>Measure Theory Term</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <td><strong>The Universe</strong></td>
+              <td>Sample Space ($\Omega$)</td>
+              <td>Measure Space ($X$)</td>
+          </tr>
+          <tr>
+              <td><strong>Valid Questions</strong></td>
+              <td>Events ($\mathcal{F}$)</td>
+              <td>$\sigma$-algebra ($\Sigma$)</td>
+          </tr>
+          <tr>
+              <td><strong>The Size</strong></td>
+              <td>Probability ($P$)</td>
+              <td>Measure ($\mu$) with $\mu(X)=1$</td>
+          </tr>
+          <tr>
+              <td><strong>The Observer</strong></td>
+              <td>Random Variable ($X$)</td>
+              <td>Measurable Function ($f$)</td>
+          </tr>
+      </tbody>
+  </table>
+
+  <p>
+    <strong>Why do we need that weird $\sigma$-algebra?</strong><br>
+    Ideally, we'd want to assign a probability to <em>any</em> subset of outcomes. But mathematics is tricky. If you have an infinite continuous space (like the real numbers), it is mathematically impossible to assign a "length" to every possible jagged, infinite subset without creating contradictions (like the Banach-Tarski paradox, where you cut a ball up and reassemble it into two identical balls). The $\sigma$-algebra is essentially a "safety list" of sets that are well-behaved enough to be measured.
+  </p>
+
+  <h3>&gt; Part 3: Deriving Truth from Axioms</h3>
+  <p>
+    Let's see how powerful this is. We don't need to argue about coin flips; we just use the rules.
+    <br><strong>The Rules:</strong> (1) $P \ge 0$, (2) Total $P=1$, (3) $P(A \cup B) = P(A) + P(B)$ if disjoint.
+  </p>
+
+  <h4>▶ A. Why adding probabilities is tricky (Subadditivity)</h4>
+  <p>
+    Intuition says "The whole is less than or equal to the sum of its parts." If you check for rain ($A$) or snow ($B$), the chance of <em>either</em> happening cannot exceed the chance of rain plus the chance of snow, because they might happen at the same time.
+  </p>
+  <div class="sql-box">
+    $$ P\left( \bigcup_{i=1}^{\infty} A_i \right) \le \sum_{i=1}^{\infty} P(A_i) $$
+  </div>
+  <p>
+    To prove this mathematically, we carve the events into non-overlapping "shards" ($B_1 = A_1$, $B_2 = A_2 \text{ without } A_1$, etc.). These shards are disjoint, so we can simply sum them (Axiom 3). Since each shard is smaller than the original set, the sum is smaller.
+  </p>
+
+  <h4>▶ B. The Inclusion-Exclusion Principle</h4>
+  <p>
+    This is the formal correction for double-counting. If you throw two blankets on the floor, the area covered is the area of Blanket A + Blanket B... but you counted the overlap twice! So you must subtract it.
+  </p>
+  
+  
+
+  <div class="sql-box">
+    $$ P(A \cup B) = P(A) + P(B) - P(A \cap B) $$
+  </div>
+  <p>
+    This simple idea expands to $n$ events: Add all singles, subtract all pairs, add all triples, subtract all quadruples... it's an alternating series that ensures every tiny intersection is counted exactly once.
+  </p>
+
+  <!-- The Return Home button is added via Script below -->
+
+</div>
+
+<script>
+// --- PART 1: Style and Toggle Mode (COPIED) ---
+const toggleBtn = document.getElementById('toggle');
+let cyberpunkMode = false;
+function setMode(isCyberpunk) {
+  cyberpunkMode = isCyberpunk;
+  document.body.classList.toggle('cyberpunk-mode', cyberpunkMode);
+  toggleBtn.textContent = cyberpunkMode ? 'Matrix Mode' : 'Cyberpunk Mode';
+}
+setMode(false); // Initialize mode
+toggleBtn.addEventListener('click', () => setMode(!cyberpunkMode));
+
+
+// --- PART 2: Return Home Button Logic (COPIED EXACTLY) ---
+// Questo script crea e aggiunge il pulsante 'return Home' alla fine del container
+const returnBtn = document.createElement('button');
+returnBtn.className = 'btn';
+returnBtn.id = 'backHome';
+returnBtn.textContent = '> return Home';
+returnBtn.style.marginTop = '1.6rem';
+
+// Aggiungi il pulsante al container
+const container = document.querySelector('.container');
+if (container) {
+  container.appendChild(returnBtn);
+  
+  // Aggiungi l'evento click
+  document.getElementById('backHome').addEventListener('click', () => {
+    // Questo ti riporterebbe a 'index.html' se esistesse nella stessa cartella
+    window.location.href = './index.html'; 
+  });
+} else {
+  console.error("Container non trovato. Impossibile aggiungere il pulsante Home.");
+}
+</script>
+</body>
+</html>
