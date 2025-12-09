@@ -962,6 +962,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('setupBtn').click();
 });
 
+// add 'return Home' button at the end
+const returnBtn = document.createElement('button');
+returnBtn.className = 'btn';
+returnBtn.id = 'backHome';
+returnBtn.textContent = '> return Home';
+returnBtn.style.marginTop = '1.6rem';
+document.querySelector('.container').appendChild(returnBtn);
+document.getElementById('backHome').addEventListener('click', () => {
+  window.location.href = './index.html';
+});
 </script>
 </body>
 </html>
