@@ -156,10 +156,10 @@
   <h1>Homework_8</h1>
   <h2>Analogies between Stochastic Processes and Combinatorics</h2>
 
-  <h3>&gt; Preamble: Comparison between HMWK 7 and the Law of Large Numbers</h3>
-  
-  <p><strong>Homework 1</strong> simulated a <strong>1D Random Walk</strong>. Every week ($n$ total steps), a server experienced an event $X_i$ with two possible outcomes: $+1$ (secure, probability $1-p$) or $-1$ (breached, probability $p$). The final score was the sum $S_n = \sum_{i=1}^n X_i$.</p>
-  
+  <h3>&gt; Preamble: Comparison between HMWK 7 (Random Walks) and HMWK 4 (Law of Large Numbers)</h3>
+
+  <p><strong>Homework 7</strong> simulated a <strong>1D Random Walk</strong>. Every week ($n$ total steps), a server experienced an event $X_i$ with two possible outcomes: $+1$ (secure, probability $1-p$) or $-1$ (breached, probability $p$). The final score was the sum $S_n = \sum_{i=1}^n X_i$.</p>
+
   <p>A "pure" simulation of the <strong>Law of Large Numbers (LLN)</strong> would observe a simpler Bernoulli process, $Y_i$, with outcomes $\{1, 0\}$ (e.g., success/failure). The LLN states that the sample mean $\bar{Y}_n = \frac{1}{n} \sum Y_i$ converges to the success probability $p$.</p>
 
   <h3>&gt; Fundamental Similarities and Differences</h3>
@@ -168,10 +168,10 @@
     <li>
       <strong>Similarity (The Bernoulli Process):</strong> Both models are founded on <strong>i.i.d. Bernoulli trials</strong> (independent and identically distributed). The previous homework was a simple linear transformation of a standard Bernoulli process ($K_n$, the *number* of successes):
       $$ S_n = (+1) \cdot K_n + (-1) \cdot (n - K_n) = 2K_n - n $$
-      Simulating $S_n$ is equivalent to simulating $K_n$. The convergence of the empirical distribution of $S_n$ to its theoretical form (which we saw in HMWK 1) is a direct manifestation of the LLN.
+      Simulating $S_n$ is equivalent to simulating $K_n$. The convergence of the empirical distribution of $S_n$ to its theoretical form (which we saw in HMWK 7) is a direct manifestation of the LLN.
     </li>
     <li>
-      <strong>Difference (The State Space):</strong> HMWK 1 focuses on the cumulative "score" (a state space $S_n \in \{-n, -n+2, ..., n\}$), typical of Random Walks. A standard LLN simulation focuses on the "count" ($K_n \in \{0, 1, ..., n\}$). The concepts are mathematically equivalent, but the physical interpretation (a "walk" vs. a "success rate") differs.
+      <strong>Difference (The State Space):</strong> HMWK 7 focuses on the cumulative "score" (a state space $S_n \in \{-n, -n+2, ..., n\}$), typical of Random Walks. A standard LLN simulation focuses on the "count" ($K_n \in \{0, 1, ..., n\}$). The concepts are mathematically equivalent, but the physical interpretation (a "walk" vs. a "success rate") differs.
     </li>
   </ul>
 
@@ -183,7 +183,7 @@
   
   <p>Why is the final distribution called "Binomial"? Because it's built with <strong>binomial coefficients</strong>. A binomial coefficient, $\binom{n}{k}$, counts the number of ways to choose $k$ items from a set of $n$, without replacement and without regard to order.</p>
   
-  <p>In our HMWK 1, to get a final score $S_n$ (which is equivalent to having $k = (S_n+n)/2$ successes), there are exactly $\binom{n}{k}$ unique paths (trajectories) that lead to that result. If $p=0.5$, every path is equally likely, so the probability of a final score is $\binom{n}{k} / 2^n$.</p>
+  <p>In our HMWK 7, to get a final score $S_n$ (which is equivalent to having $k = (S_n+n)/2$ successes), there are exactly $\binom{n}{k}$ unique paths (trajectories) that lead to that result. If $p=0.5$, every path is equally likely, so the probability of a final score is $\binom{n}{k} / 2^n$.</p>
 
   <p><strong>Pascal's Triangle</strong> is the geometric visualization of these coefficients. Each number in the triangle is the sum of the two numbers above it. This corresponds exactly to the number of paths to reach a point in a Random Walk: to arrive at step $n$, position $k$, you must have come from either $(n-1, k-1)$ or $(n-1, k)$.</p>
 
@@ -233,7 +233,7 @@
     <li>It defines the <strong>probability distribution</strong> (Statistics, Binomial Distribution).</li>
     <li>It is the coefficient in the <strong>algebraic expansion</strong> (Algebra, Binomial Theorem).</li>
   </ol>
-  The simulation in HMWK 1 empirically demonstrated (via the LLN) the validity of these theoretical connections.
+  The simulation in HMWK 4 empirically demonstrated (via the LLN) the validity of these theoretical connections.
   </p>
   
   <!-- The "Return Home" button will be added here by the script -->
